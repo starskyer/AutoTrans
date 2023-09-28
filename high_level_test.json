@@ -1,0 +1,13 @@
+[{
+    "optype": "gelu", 
+    "is_start": 0, 
+    "is_final": 0, 
+    "input_num": 1, 
+    "input_index": [80],  
+    "input_size": [[128, 3072]],  
+    "output_num": 1, 
+    "output_index": [81],  
+    "output_size": [[128, 3072]], 
+    "data_format": ["int8", "int8"], 
+    "quant_param": [[-1, -1, -1]]
+}]

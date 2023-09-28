@@ -12,7 +12,7 @@ module nnlut_gelu_64
     parameter k_WIDTH = 32,
     parameter b_WIDTH = 32, 
     parameter result_WIDTH = x_WIDTH + k_WIDTH + 1, // 41, 8bitxx * 32bit k + 32 bit b
-    parameter bp_NUM = 16,   //breakpoint的数�?????
+    parameter bp_NUM = 16,   //breakpoin
     parameter OUTPUT_WIDTH = 8  
 )
 (
