@@ -4,7 +4,7 @@ from configparser import ConfigParser
 
 #def builder(mode, content):
 
-def main():
+def main():#
     conf = ConfigParser()
     conf.read("./libinfo.ini")
     lib_dict = {}
