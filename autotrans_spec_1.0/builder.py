@@ -23,9 +23,10 @@ def main():#
             # optypes in dag_match:  Identity, Constant, Shape, Expand, Gather, Add, Layernorm, Mul, MatMul, 
             #                        Reshape, Transpose, Div, Softmax, Gelu, Gemm, Tanh, Relu
             # seemingly not found
-            
+            dimension_1=content_list[i]["input_size"][0][0]
+            dimension_2=content_list[i]["input_size"][0][1]
+
             if(optype == 'gelu'):
-                dimension=content_list[i]["input_size"][0][0]
                 modified_gelu=open("./modified_verilog/nnlut_gelu.v","r+")
                 with open("./autotrans_spec_1.0/op_trans/nnlut_gelu_64.v","r+") as gelufile:
                     data_lines=gelufile.readlines()
@@ -51,7 +52,15 @@ def main():#
                 
             # elif(optype == 'merge'):
 
-            # elif(optype == 'MADD'):
+            elif(optype == 'MADD'):
+                modified_MADD=open("./modified_verilog/Madder.v","r+")
+                with open("./autotrans_spec_1.0/op_trans/Madder_128_768.v","r+") as MADDfile:
+                    data_lines=MADDfile.readlines()
+                    for line in data_lines:
+                        if "parameter ADDER_NUM = 'd128" in line:
+                            modified_MADD.write(line.replace("parameter ADDER_NUM = 'd128", "parameter ADDER_NUM = 'd{num}".format(num=dimension_1)))
+                        else:
+                            modified_MADD.write(line)
 
             elif(optype == 'layernorm'):
                 modified_layernorm=open("./modified_verilog/nnlut_layernorm.v","r+")
