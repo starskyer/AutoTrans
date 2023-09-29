@@ -31,7 +31,7 @@ def main():#
                     data_lines=gelufile.readlines()
                     for line in data_lines:
                         if 'parameter DIMENTION = 64' in line:
-                            modified_gelu.write(line.replace('parameter DIMENTION = 64', 'parameter DIMENTION = {num}'.format(num=dimension)))
+                            modified_gelu.write(line.replace('parameter DIMENTION = 64', 'parameter DIMENTION = {num}'.format(num=dimension_1)))
                         else:
                             modified_gelu.write(line)
 
@@ -51,27 +51,18 @@ def main():#
                 
             # elif(optype == 'merge'):
 
-            elif(optype == 'MADD'):
-                dimension=content_list[i]["input_size"][0][0]*content_list[i]["input_size"][0][1]
-                modified_MADD=open("./modified_verilog/MADD_modified.v","r+")
-                with open("./autotrans_spec_1.0/op_trans/adder_768.v","r+") as MADDfile:
-                    data_lines=MADDfile.readlines()
-                    for line in data_lines:
-                        if "parameter WIDTH_ADDEND = 'd8" in line:
-                            modified_layernorm.write(line.replace("parameter WIDTH_ADDEND = 'd8", "parameter WIDTH_ADDEND = 'd{num}".format(num=dimension)))
-                        else:
-                            modified_layernorm.write(line)
+            # elif(optype == 'MADD'):
 
             elif(optype == 'layernorm'):
-                dimension=content_list[i]["input_size"][0][0]
-                modified_layernorm=open("./modified_verilog/nnlut_layernorm_modified.v","r+")
+                modified_layernorm=open("./modified_verilog/nnlut_layernorm.v","r+")
                 with open("./autotrans_spec_1.0/op_trans/layernorm_nnlut.v","r+") as layernormfile:
                     data_lines=layernormfile.readlines()
                     for line in data_lines:
-                        if 'parameter   INPUT_WIDTH = 8' in line:
-                            modified_layernorm.write(line.replace('parameter   INPUT_WIDTH = 8', 'parameter   INPUT_WIDTH = {num}'.format(num=dimension)))
+                        if 'parameter   INPUT_NUM = 768' in line:
+                            modified_layernorm.write(line.replace('parameter   INPUT_NUM = 768,', 'parameter INPUT_NUM = {num}'.format(num=dimension_2)))
                         else:
                             modified_layernorm.write(line)
+
             
             # elif(optype == 'MM'):
 
