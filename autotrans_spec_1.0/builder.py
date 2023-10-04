@@ -64,11 +64,11 @@ def main():#
 
             elif(optype == 'layernorm'):
                 modified_layernorm=open("./modified_verilog/nnlut_layernorm.v","r+")
-                with open("./autotrans_spec_1.0/op_trans/layernorm_nnlut.v","r+") as layernormfile:
+                with open("./autotrans_spec_1.0/op_trans/layernorm_nnlut_128_768.v","r+") as layernormfile:
                     data_lines=layernormfile.readlines()
                     for line in data_lines:
-                        if 'parameter   INPUT_NUM = 768' in line:
-                            modified_layernorm.write(line.replace('parameter   INPUT_NUM = 768,', 'parameter INPUT_NUM = {num}'.format(num=dimension_2)))
+                        if 'parameter   SENTENCE_NUM=128' in line:
+                            modified_layernorm.write(line.replace('parameter   SENTENCE_NUM=128,', 'parameter SENTENCE_NUM = {num}'.format(num=dimension_1)))
                         else:
                             modified_layernorm.write(line)
 

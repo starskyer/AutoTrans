@@ -49,5 +49,5 @@ generate
         .b(b_mem[i]), .b_valid_n(b_valid_n), .result(result_mem[i]), .result_valid_n(result_valid_n_part[i]));
     end
 endgenerate
-assign result= &result_valid_n_part;
+assign result_valid_n= &result_valid_n_part;
 endmodule
