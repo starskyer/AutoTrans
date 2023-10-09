@@ -1,20 +1,9 @@
-`timescale 1ns / 1ps
-////////////////////////////////////////////////////////////////////////////////// 
-// Create Date: 2022/10/14 10:15:29
-// Module Name: layernorm
-// Description: 瀹炵幇layernorm鐨勬暣鏁扮畻娉�
-// Dependencies: 渚濊禆浜庝互涓嬫ā鍧楋�?
-// add_group, adder_768, clip, divide768, (FIFO IP)fifo_8kb_32, long2short, 
-// multiplier_group, short2long, reciprocal_24, sqrt_21_11
-//////////////////////////////////////////////////////////////////////////////////
-
-
 module layernorm_nnlut_128_768
 #(
     parameter   INPUT_WIDTH = 8,
     parameter   INPUT_NUM = 768,
     parameter   OUTPUT_WIDTH = 8,
-    parameter   SENTENCE_NUM=128
+    parameter   SENTENCE_NUM = 128
 )
 (
 //*************************************** System signal ***************************************//

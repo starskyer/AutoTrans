@@ -1,5 +1,7 @@
-module Madder_128_768 
+module MADD_method1
 #(
+
+    
     parameter ADDER_NUM = 'd128,
     parameter DIMENTION = 'd768, 
     parameter WIDTH_ADDEND = 'd8, 

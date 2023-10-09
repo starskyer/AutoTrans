@@ -23,7 +23,7 @@
 module adder
 #(
 parameter WIDTH_ADDEND    =   'd8, 
-parameter WIDTH_SUM       =   WIDTH_ADDEND + 1
+parameter WIDTH_SUM       =   WIDTH_ADDEND
 )
 (
 input signed  [WIDTH_ADDEND - 1   :   0]  addend1,
