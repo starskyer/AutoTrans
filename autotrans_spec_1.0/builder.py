@@ -47,14 +47,20 @@ def builder(mode, network_file, lib_dict):
                 address="./op_trans/{}.v".format(optype)
                 with open(address)as file_to_be_modified:
                     content=file_to_be_modified.read().replace('\n', ' ')
+                    modified_content = content  # 创建一个副本用于修改
                     search=re.compile('#(input_size\[.*?\])')#正则表达式匹配人工要求输入的input_size
                     input_size_list=search.findall(content)#匹配注释里的input_size
                     if param_list[0]=="input_size":#知道接下来要改input_size
+                        matching_lines = []  # 用于存储匹配的行
+                        modified_content = content  # 创建一个副本用于修改
                         for index1,one_input_size in enumerate(input_size):
                             for index2,everyParameter in enumerate(one_input_size):
                                 if ("input"+"[{}]".format(index1)+"[{}]".format(index2)) in input_size_list:#如果input_size给了的话,此时去匹配对应的行进行参数修改
-                                    
-
+                                        # 构建新的行内容
+                                        keyword_to_match = f"input_size[{index1}][{index2}]"            
+                                        modified_content = modified_content.replace(f"'=.*,//{keyword_to_match}'", f"{input_size[index1][index2]}")
+                                        #替换行内容
+                        modified_file.write(modified_content)#写入
                                 
                             
                     
