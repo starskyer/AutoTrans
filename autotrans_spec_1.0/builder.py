@@ -3,9 +3,16 @@ import json
 from configparser import ConfigParser
 import re
 
+class myconf(ConfigParser): # ensure uppercase
+    def __init__(self, defaults=None):
+        ConfigParser.__init__(self, defaults=defaults)
 
-def read_libinfo(libinfo_file): # for example: lib_dict = {'code': {'gelu_method1': ['input_size', 'output_size']}}
-    conf = ConfigParser()
+    def optionxform(self, optionstr):
+        return optionstr
+
+
+def read_libinfo(libinfo_file): # for example: lib_dict = {'code': {'Gelu_method1': ['input_size', 'output_size']}}
+    conf = myconf()
     conf.read(libinfo_file)
 
     lib_dict = {}
@@ -25,9 +32,7 @@ def builder(mode, network_file, lib_dict):
         content_list = json.load(file)
         for i in range(len(content_list)): # content_list[i] represents an operator
             optype = content_list[i]["op_type"]
-            # optypes in high_level: MM, split, transpose, softmax, merge, MADD, layernorm, gelu.
-            # optypes in dag_match:  Identity, Constant, Shape, Expand, Gather, Add, Layernorm, Mul, MatMul, 
-            #                        Reshape, Transpose, Div, Softmax, Gelu, Gemm, Tanh, Relu
+            # optypes in high_level: 'MAC', 'Split', 'Transpose', 'MatMul', 'Softmax', 'Merge', 'Add', 'Layernorm', 'Gelu'
             input_shape= content_list[i]["input_shape"]
             output_shape = content_list[i]["output_shape"]
             op_name=content_list[i]["op_name"]
@@ -35,21 +40,35 @@ def builder(mode, network_file, lib_dict):
 
 
             found = 0
-            param_list = []
-            for method in lib_dict[mode].keys():
-                print(method)
-                print(optype.lower())
-                if optype.lower() in method.split('_'):
+            method_dict = {}
+            for method in lib_dict[mode].items(): # for example: method = ('Gelu_method1', ['input_size', 'output_size'])
+                method_name = method[0]
+                method_params = method[1]
+                if optype in method_name.split('_'):
                     found = 1
-                    param_list = lib_dict[mode][method]
-                    break
+                    method_dict[method_name] = method_params 
+                    # for example: if optype is 'Add',
+                    # method_dict = {'Add_method1': ['input_size', 'output_size'], 'Add_method2': ['input_size', 'output_size']}
+
+            # print(method_dict)
 
             if found == 0:
                 print("Generation failed: Cannot find optype \"" + optype + "\" in libinfo.")
 
             else:
-                modified_file = open("./modified_verilog/" + op_name + "_modified.v", "r+")
-                address="./autotrans_spec_1.0/op_trans/{}.v".format(optype)
+                modified_file = open("./modified_verilog/" + op_name + "_modified.v", "w+")
+                if len(method_dict) == 1:
+                    name="{}_method1".format(optype)
+                    address = "./autotrans_spec_1.0/op_trans/{}.v".format(name)
+                else:
+                    print('''Multiple methods for operator \"" + optype +"\" was found.
+                          ''')
+                    
+                    method = "test" # TODO: method应该是用户输入的字符串
+
+                    name="{}_{}".format(optype, method)
+                    address = "./autotrans_spec_1.0/op_trans/{}.v".format(name)
+
                 with open(address)as file_to_be_modified:
                     content=file_to_be_modified.read()
                     modified_content = file_to_be_modified.read().replace('\n', ' ')  # 创建一个副本用于修改
@@ -57,7 +76,7 @@ def builder(mode, network_file, lib_dict):
                     input_size_list=search.findall(content)#匹配注释里的input_size
  
  
-                    if param_list[0]=="input_size":#知道接下来要改input_size
+                    if method_dict[name][0] =="input_size":#知道接下来要改input_size
                         matching_lines = []  # 用于存储匹配的行
                         for index1,one_input_size in enumerate(input_shape):
                             for index2,everyParameter in enumerate(one_input_size):
@@ -131,9 +150,9 @@ def builder(mode, network_file, lib_dict):
 
 
 def main():
-    lib_dict = read_libinfo("E:/文献/硬件加速器和算子文献/AutoTrans/autotrans_spec_1.0/libinfo.ini")
+    lib_dict = read_libinfo("autotrans_spec_1.0/libinfo.ini")
     builder("code","autotrans_spec_1.0/test.json",lib_dict)  
-
+    print(lib_dict)
 
 
 

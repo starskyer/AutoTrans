@@ -1,8 +1,8 @@
-module gelu_method1
+module Gelu_method1
 #(
-    parameter GELU_NUM = 128, //input_size[0][0]
-    parameter DIMENTION = 64, //input_size[0][1]
-    parameter x_WIDTH = 8,
+    parameter GELU_NUM = 128, //input_size[0][1]
+    parameter DIMENTION = 64, //input_size[0][2]
+    parameter x_WIDTH = 8, //input_size[0][0]
     parameter k_WIDTH = 32,
     parameter b_WIDTH = 32, 
     parameter result_WIDTH = x_WIDTH + k_WIDTH + 1, // 41, 8bitxx * 32bit k + 32 bit b

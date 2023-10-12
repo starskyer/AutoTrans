@@ -1,7 +1,7 @@
 import json
 
 def optype_count():
-    with open("./autotrans_spec_1.0/high_level_IR_wi_comment.json", "r") as file:
+    with open("./autotrans_spec_1.0/test_info.json", "r") as file:
         content_list = json.load(file)
         optype_list = []
         for i in range(len(content_list)):
@@ -12,7 +12,7 @@ def optype_count():
         file.close()
 
 def data_format_count():
-    with open("./autotrans_spec_1.0/high_level_IR_wi_comment.json", "r") as file:
+    with open("./autotrans_spec_1.0/test_info.json", "r") as file:
         content_list = json.load(file)
         data_list = []
         for i in range(len(content_list)):
@@ -24,7 +24,8 @@ def data_format_count():
         file.close()
 
 def main():
-    data_format_count()
+    optype_count()
+    # data_format_count()
 
 if __name__ == '__main__':
     main()

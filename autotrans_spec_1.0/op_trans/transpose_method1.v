@@ -1,4 +1,4 @@
-module transpose_method1
+module Transpose_method1
 #(
     parameter INPUT_SIZE_1  = 'd128, //input_size[0][0]
     parameter INPUT_SIZE_2  = 'd768, //input_size[0][1]

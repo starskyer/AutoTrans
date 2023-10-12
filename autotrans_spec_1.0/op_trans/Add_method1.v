@@ -1,4 +1,4 @@
-module MADD_method1
+module Add_method1
 #(
 
     
