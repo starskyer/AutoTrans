@@ -12,7 +12,7 @@ module nnlut_gelu_64
     parameter k_WIDTH = 32,
     parameter b_WIDTH = 32, 
     parameter result_WIDTH = x_WIDTH + k_WIDTH + 1, // 41, 8bitxx * 32bit k + 32 bit b
-    parameter bp_NUM = 16,   //breakpoin
+    parameter bp_NUM = 16,   //breakpoint
     parameter OUTPUT_WIDTH = 8  
 )
 (
@@ -57,15 +57,11 @@ module nnlut_gelu_64
 // ------------------------------- Pipeline Begins -------------------------------------------
     // ---------------- pipeline 1: clk 1-2: nn-lut ---------------------------
     wire   signed   [x_WIDTH - 1   :   0]    x_mem    [DIMENTION - 1  :   0];
-    assign  {x_mem[0],  x_mem[1],  x_mem[2],  x_mem[3],  x_mem[4],  x_mem[5],  x_mem[6],  x_mem[7],  
-             x_mem[8],  x_mem[9],  x_mem[10], x_mem[11], x_mem[12], x_mem[13], x_mem[14], x_mem[15],
-             x_mem[16], x_mem[17], x_mem[18], x_mem[19], x_mem[20], x_mem[21], x_mem[22], x_mem[23],
-             x_mem[24], x_mem[25], x_mem[26], x_mem[27], x_mem[28], x_mem[29], x_mem[30], x_mem[31],
-             x_mem[32], x_mem[33], x_mem[34], x_mem[35], x_mem[36], x_mem[37], x_mem[38], x_mem[39],
-             x_mem[40], x_mem[41], x_mem[42], x_mem[43], x_mem[44], x_mem[45], x_mem[46], x_mem[47],
-             x_mem[48], x_mem[49], x_mem[50], x_mem[51], x_mem[52], x_mem[53], x_mem[54], x_mem[55],
-             x_mem[56], x_mem[57], x_mem[58], x_mem[59], x_mem[60], x_mem[61], x_mem[62], x_mem[63]
-            } = x;
+    generate
+        for(i = 0; i < DIMENTION ; i = i + 1) begin
+            assign x_mem[i] = x[(i + 1) * x_WIDTH - 1 : i * x_WIDTH];
+        end
+    endgenerate
 
     generate
         for(i = 0; i < DIMENTION ; i = i + 1) begin: inst_gelu_64nnlut
@@ -91,15 +87,11 @@ module nnlut_gelu_64
         end
     end
 
-    assign gelu = {gelu_mem[0],  gelu_mem[1],  gelu_mem[2],  gelu_mem[3],  gelu_mem[4],  gelu_mem[5],  gelu_mem[6],  gelu_mem[7],  
-             gelu_mem[8],  gelu_mem[9],  gelu_mem[10], gelu_mem[11], gelu_mem[12], gelu_mem[13], gelu_mem[14], gelu_mem[15],
-             gelu_mem[16], gelu_mem[17], gelu_mem[18], gelu_mem[19], gelu_mem[20], gelu_mem[21], gelu_mem[22], gelu_mem[23],
-             gelu_mem[24], gelu_mem[25], gelu_mem[26], gelu_mem[27], gelu_mem[28], gelu_mem[29], gelu_mem[30], gelu_mem[31],
-             gelu_mem[32], gelu_mem[33], gelu_mem[34], gelu_mem[35], gelu_mem[36], gelu_mem[37], gelu_mem[38], gelu_mem[39],
-             gelu_mem[40], gelu_mem[41], gelu_mem[42], gelu_mem[43], gelu_mem[44], gelu_mem[45], gelu_mem[46], gelu_mem[47],
-             gelu_mem[48], gelu_mem[49], gelu_mem[50], gelu_mem[51], gelu_mem[52], gelu_mem[53], gelu_mem[54], gelu_mem[55],
-             gelu_mem[56], gelu_mem[57], gelu_mem[58], gelu_mem[59], gelu_mem[60], gelu_mem[61], gelu_mem[62], gelu_mem[63]};
-
+    generate
+        for(i = 0; i < DIMENTION ; i = i + 1) begin
+            assign gelu[(i + 1) * OUTPUT_WIDTH - 1 : i * OUTPUT_WIDTH] = gelu_mem[i];
+        end
+    endgenerate
 
 
 

@@ -1,9 +1,7 @@
 module transpose_method1
 #(
-
-    
-    parameter INPUT_SIZE_1  = 'd128,
-    parameter INPUT_SIZE_2  = 'd768,
+    parameter INPUT_SIZE_1  = 'd128, //input_size[0][0]
+    parameter INPUT_SIZE_2  = 'd768, //input_size[0][1]
     parameter DATA_WIDTH    = 'd8,
     parameter OUTPUT_SIZE_1 = INPUT_SIZE_2,
     parameter OUTPUT_SIZE_2 = INPUT_SIZE_1
