@@ -1,0 +1,50 @@
+[{
+    "op_id": 411,
+    "op_name": "Add_456",
+    "op_type": "Add",
+    "input": [
+        "input.116",
+        "onnx::MatMul_918"
+    ],
+    "output": [
+        "onnx::ReduceMean_995"
+    ],
+    "input_shape": [
+        [
+            32,
+            128,
+            768
+        ],
+        [
+            32,
+            128,
+            768
+        ]
+    ],
+    "output_shape": [
+        [
+            32,
+            128,
+            768
+        ]
+    ],
+    "topo": {
+        "pre": [
+            [
+                409,
+                "MAC"
+            ],
+            [
+                376,
+                "Layernorm"
+            ]
+        ],
+        "next": [
+            [
+                412,
+                "Layernorm"
+            ]
+        ]
+    }
+}
+]

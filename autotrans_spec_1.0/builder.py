@@ -24,17 +24,22 @@ def builder(mode, network_file, lib_dict):
     with open(network_file, "r") as file:
         content_list = json.load(file)
         for i in range(len(content_list)): # content_list[i] represents an operator
-            optype = content_list[i]["optype"]
+            optype = content_list[i]["op_type"]
             # optypes in high_level: MM, split, transpose, softmax, merge, MADD, layernorm, gelu.
             # optypes in dag_match:  Identity, Constant, Shape, Expand, Gather, Add, Layernorm, Mul, MatMul, 
             #                        Reshape, Transpose, Div, Softmax, Gelu, Gemm, Tanh, Relu
-            input_size = content_list[i]["input_size"]
-            output_size = content_list[i]["output_size"]
+            input_shape= content_list[i]["input_shape"]
+            output_shape = content_list[i]["output_shape"]
+            op_name=content_list[i]["op_name"]
+
+
 
             found = 0
             param_list = []
             for method in lib_dict[mode].keys():
-                if optype in method.split('_'):
+                print(method)
+                print(optype.lower())
+                if optype.lower() in method.split('_'):
                     found = 1
                     param_list = lib_dict[mode][method]
                     break
@@ -43,25 +48,33 @@ def builder(mode, network_file, lib_dict):
                 print("Generation failed: Cannot find optype \"" + optype + "\" in libinfo.")
 
             else:
-                modified_file = open("./modified_verilog/" + optype + "_modified.v", "r+")
-                address="./op_trans/{}.v".format(optype)
+                modified_file = open("./modified_verilog/" + op_name + "_modified.v", "r+")
+                address="./autotrans_spec_1.0/op_trans/{}.v".format(optype)
                 with open(address)as file_to_be_modified:
-                    content=file_to_be_modified.read().replace('\n', ' ')
-                    modified_content = content  # 创建一个副本用于修改
-                    search=re.compile('#(input_size\[.*?\])')#正则表达式匹配人工要求输入的input_size
+                    content=file_to_be_modified.read()
+                    modified_content = file_to_be_modified.read().replace('\n', ' ')  # 创建一个副本用于修改
+                    search=re.compile('//(input_size\[.*?\]\[.*?\])')#正则表达式匹配人工要求输入的input_size
                     input_size_list=search.findall(content)#匹配注释里的input_size
+ 
+ 
                     if param_list[0]=="input_size":#知道接下来要改input_size
                         matching_lines = []  # 用于存储匹配的行
-                        modified_content = content  # 创建一个副本用于修改
-                        for index1,one_input_size in enumerate(input_size):
+                        for index1,one_input_size in enumerate(input_shape):
                             for index2,everyParameter in enumerate(one_input_size):
-                                if ("input"+"[{}]".format(index1)+"[{}]".format(index2)) in input_size_list:#如果input_size给了的话,此时去匹配对应的行进行参数修改
+                                print("input_size"+"[{}]".format(index1)+"[{}]".format(index2))
+                                if ("input_size"+"[{}]".format(index1)+"[{}]".format(index2)) in input_size_list:#如果input_size给了的话,此时去匹配对应的行进行参数修改
                                         # 构建新的行内容
-                                        keyword_to_match = f"input_size[{index1}][{index2}]"            
-                                        modified_content = modified_content.replace(f"'=.*,//{keyword_to_match}'", f"{input_size[index1][index2]}")
+                                        keyword_to_match = re.escape("input_size[{index1}][{index2}]".format(index1=index1,index2=index2))  
+                                        print(keyword_to_match)    
+                                        print(input_shape[index1][index2])
+                                        a="=(.*)(?=(?:,)\s*\/\/"+keyword_to_match+')'#(?= ... ) 是正则表达式中的正向预查（Positive Lookahead）构造，它用于匹配一个字符串后面的内容，但不包括这个内容在匹配的结果中。
+                                        pattern_a=re.compile(a)  
+                                        content =re.sub(pattern_a,"={}".format(input_shape[index1][index2]),content)
+
                                         #替换行内容
-                        modified_file.write(modified_content)#写入
-                                
+                        modified_file.write(content)#写入
+
+                             
                             
                     
 
@@ -118,8 +131,8 @@ def builder(mode, network_file, lib_dict):
 
 
 def main():
-    lib_dict = read_libinfo("./autotrans_spec_1.0/libinfo.ini")
-
+    lib_dict = read_libinfo("E:/文献/硬件加速器和算子文献/AutoTrans/autotrans_spec_1.0/libinfo.ini")
+    builder("code","autotrans_spec_1.0/test.json",lib_dict)  
 
 
 

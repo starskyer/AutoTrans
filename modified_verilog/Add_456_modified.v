@@ -2,9 +2,9 @@ module MADD_method1
 #(
 
     
-    parameter ADDER_NUM = 'd128,//input_size[0][1]
-    parameter DIMENTION = 'd768, //input_size[0][2]
-    parameter WIDTH_ADDEND = 'd8, //input_size[0][0]
+    parameter ADDER_NUM =128,//input_size[0][1]
+    parameter DIMENTION =768, //input_size[0][2]
+    parameter WIDTH_ADDEND =32, //input_size[0][0]
     parameter WIDTH_SUM = WIDTH_ADDEND
 )(
 //********************************* Input Signal *********************************
