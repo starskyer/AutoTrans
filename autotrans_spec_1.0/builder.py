@@ -64,7 +64,7 @@ def builder(mode, network_file, lib_dict):
                     print('''Multiple methods for operator \"" + optype +"\" was found.
                           ''')
                     
-                    method = "test" # TODO: method应该是用户输入的字符串
+                    method = input("which method to use?") #  method应该是用户输入的字符串
 
                     name="{}_{}".format(optype, method)
                     address = "./autotrans_spec_1.0/op_trans/{}.v".format(name)

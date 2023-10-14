@@ -1,6 +1,6 @@
-// This is test!!
+// This is test module.
 
-module MADD_method1
+module Add_test
 #(
 
     
