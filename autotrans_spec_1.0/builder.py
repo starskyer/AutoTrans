@@ -75,8 +75,8 @@ def builder(mode, network_file, lib_dict):
                     search=re.compile('//(input_shape\[.*?\]\[.*?\])') # Regular expression finds "input_shape[index][index]" in the comments
                     input_shape_list=search.findall(content) # find all "//input_shape[index][index]"
  
- 
-                    if "input_shape" in method_dict[name]: # (In libinfo.ini) The method requires "input_shape" parameter
+                    # for parameter in method_dict[name]: # (In libinfo.ini) The method requires a parameter, such as "input_shape"
+                    if "input_shape" in method_dict[name]:
                         matching_lines = []  # 用于存储匹配的行
                         for index1,one_input_shape in enumerate(input_shape):
                             for index2,everyParameter in enumerate(one_input_shape):
@@ -91,10 +91,8 @@ def builder(mode, network_file, lib_dict):
                                         pattern_a = re.compile(a)  
                                         content = re.sub(pattern_a,"={}".format(input_shape[index1][index2]),content)
                                         # change content
-
-                    # if "output_shape" in method_dict[name]:
                                         
-                        modified_file.write(content)#写入
+                        modified_file.write(content) # write comment into modified file
 
                              
                             
