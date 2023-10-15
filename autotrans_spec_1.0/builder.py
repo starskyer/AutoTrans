@@ -11,7 +11,8 @@ class myconf(ConfigParser): # ensure uppercase
         return optionstr
 
 
-def read_libinfo(libinfo_file): # for example: lib_dict = {'code': {'Gelu_method1': ['input_shape', 'output_shape']}}
+def read_libinfo(libinfo_file): 
+    # for example: lib_dict = {'code': {'Gelu_method1': ['WIDTH_ADDEND-input_shape[0][0]', 'ADDER_NUM-input_shape[0][1]']}}
     conf = myconf()
     conf.read(libinfo_file)
 
@@ -25,7 +26,7 @@ def read_libinfo(libinfo_file): # for example: lib_dict = {'code': {'Gelu_method
 
     return lib_dict
 
-# class builder includes some methods
+# use "class builder" includes some methods
 def builder(mode, network_file, lib_dict):
     # find operator in lib_dict
     with open(network_file, "r") as file:
@@ -48,7 +49,8 @@ def builder(mode, network_file, lib_dict):
                     found = 1
                     method_dict[method_name] = method_params 
                     # for example: if optype is 'Add',
-                    # method_dict = {'Add_method1': ['input_shape', 'output_shape'], 'Add_method2': ['input_shape', 'output_shape']}
+                    # method_dict = {'Add_method1': ['WIDTH_ADDEND-input_shape[0][0]', 'ADDER_NUM-input_shape[0][1]'],
+                    #                'Add_method2': ['WIDTH_ADDEND-input_shape[0][0]', 'ADDER_NUM-input_shape[0][1]']}
 
             # print(method_dict)
 
@@ -125,7 +127,6 @@ def builder(mode, network_file, lib_dict):
                         #                     content = re.sub(pattern_a,"={}".format(output_shape[index1][index2]),content)
                                         
                     modified_file.write(content) # write comment into modified file
-
 
                              
                             
