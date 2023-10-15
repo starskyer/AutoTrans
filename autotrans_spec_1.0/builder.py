@@ -79,25 +79,26 @@ def builder(mode, network_file, lib_dict):
                         source_file_parameter = parameter.split('-')[0] # 'WIDTH_ADDEND'
                         test_info_parameter = parameter.split('-')[1] # 'input_shape[0][0]'
                         print(source_file_parameter)
-                        search=re.compile(source_file_parameter+"\s*=\s*(.*)?(?:\s*)(?:\n)") # Regular expression finds "input_shape[index][index]" in the comments
+                        search=re.compile("parameter\s*"+source_file_parameter+"\s*=\s*(.*)?(?:\s*)(?:\n)") # Regular expression finds "input_shape[index][index]" in the comments
                         search_result=search.findall(content)[0]
+                        print(search_result)
                         for index1,one_input_shape in enumerate(input_shape):#input部分的参数替换
                             for index2,everyParameter in enumerate(one_input_shape):
                                 if ("input_shape"+"[{}]".format(index1)+"[{}]".format(index2))== test_info_parameter:
                                     replacement="{}".format(input_shape[index1][index2])
                                     if ',' in search_result:
-                                        content=re.sub(search, rf'{source_file_parameter} = {replacement},\n',content) # find all "//input_shape[index][index]"
+                                        content=re.sub(search, rf'parameter {source_file_parameter} = {replacement},\n',content) # find all "//input_shape[index][index]"
                                     else:
-                                        content=re.sub(search, rf'{source_file_parameter} = {replacement}\n',content) 
+                                        content=re.sub(search, rf'parameter {source_file_parameter} = {replacement}\n',content) 
 
                         for index1,one_output_shape in enumerate(output_shape):#output部分的参数替换
                             for index2,everyParameter in enumerate(one_output_shape):
                                 if ("output_shape"+"[{}]".format(index1)+"[{}]".format(index2))== test_info_parameter:
                                     replacement="{}".format(input_shape[index1][index2])
                                     if ',' in search_result:
-                                        content=re.sub(search, rf'{source_file_parameter} = {replacement},\n',content) # find all "//input_shape[index][index]"
+                                        content=re.sub(search, rf'parameter {source_file_parameter} = {replacement},\n',content) # find all "//input_shape[index][index]"
                                     else:
-                                        content=re.sub(search, rf'{source_file_parameter} = {replacement}\n',content)     
+                                        content=re.sub(search, rf'parameter {source_file_parameter} = {replacement}\n',content)     
                      
                         # for index1,one_input_shape in enumerate(input_shape):
                         #     for index2,everyParameter in enumerate(one_input_shape):
