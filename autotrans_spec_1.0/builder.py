@@ -11,7 +11,8 @@ class myconf(ConfigParser): # ensure uppercase
         return optionstr
 
 
-def read_libinfo(libinfo_file): # for example: lib_dict = {'code': {'Gelu_method1': ['input_shape', 'output_shape']}}
+def read_libinfo(libinfo_file): 
+    # for example: lib_dict = {'code': {'Gelu_method1': ['WIDTH_ADDEND-input_shape[0][0]', 'ADDER_NUM-input_shape[0][1]']}}
     conf = myconf()
     conf.read(libinfo_file)
 
@@ -25,7 +26,7 @@ def read_libinfo(libinfo_file): # for example: lib_dict = {'code': {'Gelu_method
 
     return lib_dict
 
-# class builder includes some methods
+# use "class builder" includes some methods
 def builder(mode, network_file, lib_dict):
     # find operator in lib_dict
     with open(network_file, "r") as file:
@@ -48,7 +49,8 @@ def builder(mode, network_file, lib_dict):
                     found = 1
                     method_dict[method_name] = method_params 
                     # for example: if optype is 'Add',
-                    # method_dict = {'Add_method1': ['input_shape', 'output_shape'], 'Add_method2': ['input_shape', 'output_shape']}
+                    # method_dict = {'Add_method1': ['WIDTH_ADDEND-input_shape[0][0]', 'ADDER_NUM-input_shape[0][1]'],
+                    #                'Add_method2': ['WIDTH_ADDEND-input_shape[0][0]', 'ADDER_NUM-input_shape[0][1]']}
 
             # print(method_dict)
 
@@ -74,25 +76,42 @@ def builder(mode, network_file, lib_dict):
                     modified_content = file_to_be_modified.read().replace('\n', ' ')  # copy the file for revision
                     search=re.compile('//(input_shape\[.*?\]\[.*?\])') # Regular expression finds "input_shape[index][index]" in the comments
                     input_shape_list=search.findall(content) # find all "//input_shape[index][index]"
+                    search=re.compile('//(output_shape\[.*?\]\[.*?\])') # As above
+                    output_shape_list=search.findall(content)
  
-                    # for parameter in method_dict[name]: # (In libinfo.ini) The method requires a parameter, such as "input_shape"
-                    if "input_shape" in method_dict[name]:
-                        matching_lines = []  # 用于存储匹配的行
-                        for index1,one_input_shape in enumerate(input_shape):
-                            for index2,everyParameter in enumerate(one_input_shape):
-                                print("input_shape"+"[{}]".format(index1)+"[{}]".format(index2))
-                                if ("input_shape"+"[{}]".format(index1)+"[{}]".format(index2)) in input_shape_list:#如果input_shape给了的话,此时去匹配对应的行进行参数修改
-                                        # 构建新的行内容
-                                        keyword_to_match = re.escape("input_shape[{index1}][{index2}]".format(index1=index1,index2=index2))  
-                                        print(keyword_to_match)    
-                                        print(input_shape[index1][index2])
-                                        a = "=(.*)(?=(?:,)\s*\/\/" + keyword_to_match + ')'
-                                        #(?= ... ) 是正则表达式中的正向预查（Positive Lookahead）构造，它用于匹配一个字符串后面的内容，但不包括这个内容在匹配的结果中。
-                                        pattern_a = re.compile(a)  
-                                        content = re.sub(pattern_a,"={}".format(input_shape[index1][index2]),content)
-                                        # change content
+                    for parameter in method_dict[name]: # (In libinfo.ini) "parameter" looks like 'WIDTH_ADDEND-input_shape[0][0]'
+                        source_file_parameter = parameter.split('-')[0] # 'WIDTH_ADDEND'
+                        test_info_parameter = parameter.split('-')[1] # 'input_shape[0][0]'
+                        # if "input_shape" in method_dict[name]:
+                        #     matching_lines = []  # 用于存储匹配的行
+                        #     for index1,one_input_shape in enumerate(input_shape):
+                        #         for index2,everyParameter in enumerate(one_input_shape):
+                        #             print("input_shape"+"[{}]".format(index1)+"[{}]".format(index2))
+                        #             if ("input_shape"+"[{}]".format(index1)+"[{}]".format(index2)) in input_shape_list:#如果input_shape给了的话,此时去匹配对应的行进行参数修改
+                        #                     # 构建新的行内容
+                        #                     keyword_to_match = re.escape("input_shape[{index1}][{index2}]".format(index1=index1,index2=index2))  
+                        #                     print(keyword_to_match)    
+                        #                     print(input_shape[index1][index2])
+                        #                     a = "=(.*)(?=(?:,)\s*\/\/" + keyword_to_match + ')'
+                        #                     #(?= ... ) 是正则表达式中的正向预查（Positive Lookahead）构造，它用于匹配一个字符串后面的内容，但不包括这个内容在匹配的结果中。
+                        #                     pattern_a = re.compile(a)  
+                        #                     content = re.sub(pattern_a,"={}".format(input_shape[index1][index2]),content)
+                        #                     # change content
+
+                        # if "output_shape" in method_dict[name]:
+                        #     matching_lines = []
+                        #     for index1,one_output_shape in enumerate(output_shape):
+                        #         for index2,everyParameter in enumerate(one_output_shape):
+                        #             print("output_shape"+"[{}]".format(index1)+"[{}]".format(index2))
+                        #             if ("output_shape"+"[{}]".format(index1)+"[{}]".format(index2)) in output_shape_list:
+                        #                     keyword_to_match = re.escape("output_shape[{index1}][{index2}]".format(index1=index1,index2=index2))  
+                        #                     print(keyword_to_match)    
+                        #                     print(output_shape[index1][index2])
+                        #                     a = "=(.*)(?=(?:,)\s*\/\/" + keyword_to_match + ')'
+                        #                     pattern_a = re.compile(a)  
+                        #                     content = re.sub(pattern_a,"={}".format(output_shape[index1][index2]),content)
                                         
-                        modified_file.write(content) # write comment into modified file
+                    modified_file.write(content) # write comment into modified file
 
                              
                             
