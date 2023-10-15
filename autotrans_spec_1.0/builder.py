@@ -21,7 +21,9 @@ def read_libinfo(libinfo_file):
         lib_dict.update({sec:{}})
         for opt in conf.options(sec):
             value = conf.get(sec, opt) # for example: value = 'input_shape, output_shape'
-            value_list = value.split(', ')
+            value_list = value.split(',') # for example: value = ['input_shape', ' output_shape']
+            for string in value_list:
+                string = string.lstrip() # remove any whitespace at the beginning of the string
             lib_dict[sec].update({opt:value_list})
 
     return lib_dict

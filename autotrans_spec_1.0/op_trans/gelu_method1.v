@@ -1,5 +1,5 @@
 module Gelu_method1
-#(
+#(  //TODO:多余信号的问题
     parameter GELU_NUM = 128, //input_shape[0][1]
     parameter DIMENTION = 64, //input_shape[0][2]
     parameter x_WIDTH = 8, //input_shape[0][0]

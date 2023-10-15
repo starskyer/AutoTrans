@@ -1,12 +1,13 @@
 module Add_method1
 #(
-
-    
     parameter ADDER_NUM = 'd128,//input_shape[0][1]
     parameter DIMENTION = 'd768, //input_shape[0][2]
     parameter WIDTH_ADDEND = 'd8, //input_shape[0][0]
     parameter WIDTH_SUM = WIDTH_ADDEND
 )(
+//********************************* System Signal *********************************
+    input                                                           clk_p,
+    input                                                           rst_n,
 //********************************* Input Signal *********************************
     input signed  [ADDER_NUM * WIDTH_ADDEND * DIMENTION - 1   :   0]  addend1,
     input signed  [ADDER_NUM * WIDTH_ADDEND * DIMENTION - 1   :   0]  addend2,

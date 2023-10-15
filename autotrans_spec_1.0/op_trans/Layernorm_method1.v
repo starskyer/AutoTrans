@@ -1,9 +1,9 @@
-module layernorm_nnlut_128_768
+module Layernorm_method1
 #(
-    parameter   INPUT_WIDTH = 8,
-    parameter   INPUT_NUM = 768,
-    parameter   OUTPUT_WIDTH = 8,
-    parameter   SENTENCE_NUM = 128
+    parameter   INPUT_WIDTH = 8, //input_shape[0][0]
+    parameter   SENTENCE_NUM = 128, //input_shape[0][1]
+    parameter   INPUT_NUM = 768, //input_shape[0][2]
+    parameter   OUTPUT_WIDTH = 8
 )
 (
 //*************************************** System signal ***************************************//
