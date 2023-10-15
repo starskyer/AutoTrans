@@ -2,7 +2,7 @@ import json
 import numpy
 import re
 def corresponding_operators_function(data_information_dict,RESULT_STRING,WIDTH_IN,WIDTH_OUT,VALID_IN,VALID_OUT):
-    address="./op_trans/{}.v".format(data_information_dict["op_type"])
+    address="./op_trans/{}_modified.v".format(data_information_dict["op_name"])
     with open("./op_trans/top module.v",'a+') as file:
         with open(address)as file2:
             content=file2.read().replace('\n', ' ')
