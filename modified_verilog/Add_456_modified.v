@@ -1,12 +1,10 @@
-// This is test module.
-
-module Add_test
+module Add_method1
 #(
 
     
-    parameter ADDER_NUM =128,//input_size[0][1]
-    parameter DIMENTION =768, //input_size[0][2]
-    parameter WIDTH_ADDEND =32, //input_size[0][0]
+    parameter ADDER_NUM = 128,
+    parameter DIMENTION = 768,
+    parameter WIDTH_ADDEND = 32,
     parameter WIDTH_SUM = WIDTH_ADDEND
 )(
 //********************************* Input Signal *********************************

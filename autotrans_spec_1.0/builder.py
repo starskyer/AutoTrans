@@ -68,37 +68,53 @@ def builder(mode, network_file, lib_dict):
                     print('''Multiple methods for operator \"" + optype +"\" was found.
                           ''') # 
                     
-                    method = input("which method to use?") #  method应该是用户输入的字符串
+                    method = "method1"#input("which method to use?") #  method应该是用户输入的字符串
 
                     name="{}_{}".format(optype, method)
                     address = "./autotrans_spec_1.0/op_trans/{}.v".format(name)
 
                 with open(address) as file_to_be_modified: 
                     content=file_to_be_modified.read()
-                    modified_content = file_to_be_modified.read().replace('\n', ' ')  # copy the file for revision
-                    search=re.compile('//(input_shape\[.*?\]\[.*?\])') # Regular expression finds "input_shape[index][index]" in the comments
-                    input_shape_list=search.findall(content) # find all "//input_shape[index][index]"
-                    search=re.compile('//(output_shape\[.*?\]\[.*?\])') # As above
-                    output_shape_list=search.findall(content)
+            
  
                     for parameter in method_dict[name]: # (In libinfo.ini) "parameter" looks like 'WIDTH_ADDEND-input_shape[0][0]'
                         source_file_parameter = parameter.split('-')[0] # 'WIDTH_ADDEND'
                         test_info_parameter = parameter.split('-')[1] # 'input_shape[0][0]'
-                        # if "input_shape" in method_dict[name]:
-                        #     matching_lines = []  # 用于存储匹配的行
-                        #     for index1,one_input_shape in enumerate(input_shape):
-                        #         for index2,everyParameter in enumerate(one_input_shape):
-                        #             print("input_shape"+"[{}]".format(index1)+"[{}]".format(index2))
-                        #             if ("input_shape"+"[{}]".format(index1)+"[{}]".format(index2)) in input_shape_list:#如果input_shape给了的话,此时去匹配对应的行进行参数修改
-                        #                     # 构建新的行内容
-                        #                     keyword_to_match = re.escape("input_shape[{index1}][{index2}]".format(index1=index1,index2=index2))  
-                        #                     print(keyword_to_match)    
-                        #                     print(input_shape[index1][index2])
-                        #                     a = "=(.*)(?=(?:,)\s*\/\/" + keyword_to_match + ')'
-                        #                     #(?= ... ) 是正则表达式中的正向预查（Positive Lookahead）构造，它用于匹配一个字符串后面的内容，但不包括这个内容在匹配的结果中。
-                        #                     pattern_a = re.compile(a)  
-                        #                     content = re.sub(pattern_a,"={}".format(input_shape[index1][index2]),content)
-                        #                     # change content
+                        print(source_file_parameter)
+                        search=re.compile("parameter\s*"+source_file_parameter+"\s*=\s*(.*)?(?:\s*)(?:\n)") # Regular expression finds "input_shape[index][index]" in the comments
+                        search_result=search.findall(content)[0]
+                        print(search_result)
+                        for index1,one_input_shape in enumerate(input_shape):#input部分的参数替换
+                            for index2,everyParameter in enumerate(one_input_shape):
+                                if ("input_shape"+"[{}]".format(index1)+"[{}]".format(index2))== test_info_parameter:
+                                    replacement="{}".format(input_shape[index1][index2])
+                                    if ',' in search_result:
+                                        content=re.sub(search, rf'parameter {source_file_parameter} = {replacement},\n',content) # find all "//input_shape[index][index]"
+                                    else:
+                                        content=re.sub(search, rf'parameter {source_file_parameter} = {replacement}\n',content) 
+
+                        for index1,one_output_shape in enumerate(output_shape):#output部分的参数替换
+                            for index2,everyParameter in enumerate(one_output_shape):
+                                if ("output_shape"+"[{}]".format(index1)+"[{}]".format(index2))== test_info_parameter:
+                                    replacement="{}".format(input_shape[index1][index2])
+                                    if ',' in search_result:
+                                        content=re.sub(search, rf'parameter {source_file_parameter} = {replacement},\n',content) # find all "//input_shape[index][index]"
+                                    else:
+                                        content=re.sub(search, rf'parameter {source_file_parameter} = {replacement}\n',content)     
+                     
+                        # for index1,one_input_shape in enumerate(input_shape):
+                        #     for index2,everyParameter in enumerate(one_input_shape):
+                        #         print("input_shape"+"[{}]".format(index1)+"[{}]".format(index2))
+                        #         if ("input_shape"+"[{}]".format(index1)+"[{}]".format(index2)) in input_shape_list:#如果input_shape给了的话,此时去匹配对应的行进行参数修改
+                        #                 # 构建新的行内容
+                        #                 keyword_to_match = re.escape("input_shape[{index1}][{index2}]".format(index1=index1,index2=index2))  
+                        #                 print(keyword_to_match)    
+                        #                 print(input_shape[index1][index2])
+                        #                 a = "=(.*)(?=(?:,)\s*\/\/" + keyword_to_match + ')'
+                        #                 #(?= ... ) 是正则表达式中的正向预查（Positive Lookahead）构造，它用于匹配一个字符串后面的内容，但不包括这个内容在匹配的结果中。
+                        #                 pattern_a = re.compile(a)  
+                        #                 content = re.sub(pattern_a,"={}".format(input_shape[index1][index2]),content)
+                                            # change content
 
                         # if "output_shape" in method_dict[name]:
                         #     matching_lines = []
@@ -118,55 +134,6 @@ def builder(mode, network_file, lib_dict):
                              
                             
                     
-
-            # if(optype == 'gelu'):
-            #     modified_gelu=open("./modified_verilog/nnlut_gelu.v","r+")
-            #     with open("./autotrans_spec_1.0/op_trans/nnlut_gelu_64.v","r+") as gelufile:
-            #         data_lines=gelufile.readlines()
-            #         for line in data_lines:
-            #             if 'parameter DIMENTION = 64' in line:
-            #                 modified_gelu.write(line.replace('parameter DIMENTION = 64', 'parameter DIMENTION = {num}'.format(num=dimension_1)))
-            #             else:
-            #                 modified_gelu.write(line)
-
-            # # elif(optype == 'split'):
-
-            # # elif(optype == 'transpose'):
-
-            # # elif(optype == 'softmax'):
-            # #     modified_softmax=open("./modified_verilog/nnlut_softmax_modified.v","r+")
-            # #     with open("./autotrans_spec_1.0/op_trans/nnlut_softmax_128_quant.v","r+") as softmaxfile:
-            # #         data_lines=softmaxfile.readlines()
-            # #         for line in data_lines:
-            # #             if 'parameter DIMENTION = 64' in line:
-            # #                 modified_softmax.write(line.replace('parameter DIMENTION = 64', 'parameter DIMENTION = {num}'.format(num=dimension)))
-            # #             else:
-            # #                 modified_softmax.write(line)
-                
-            # # elif(optype == 'merge'):
-
-            # elif(optype == 'MADD'):
-            #     modified_MADD=open("./modified_verilog/Madder.v","r+")
-            #     with open("./autotrans_spec_1.0/op_trans/Madder_128_768.v","r+") as MADDfile:
-            #         data_lines=MADDfile.readlines()
-            #         for line in data_lines:
-            #             if "parameter ADDER_NUM = 'd128" in line:
-            #                 modified_MADD.write(line.replace("parameter ADDER_NUM = 'd128", "parameter ADDER_NUM = 'd{num}".format(num=dimension_1)))
-            #             else:
-            #                 modified_MADD.write(line)
-
-            # elif(optype == 'layernorm'):
-            #     modified_layernorm=open("./modified_verilog/nnlut_layernorm.v","r+")
-            #     with open("./autotrans_spec_1.0/op_trans/layernorm_nnlut_128_768.v","r+") as layernormfile:
-            #         data_lines=layernormfile.readlines()
-            #         for line in data_lines:
-            #             if 'parameter   SENTENCE_NUM=128' in line:
-            #                 modified_layernorm.write(line.replace('parameter   SENTENCE_NUM=128,', 'parameter SENTENCE_NUM = {num}'.format(num=dimension_1)))
-            #             else:
-            #                 modified_layernorm.write(line)
-
-            
-            # # elif(optype == 'MM'):
 
 
 
