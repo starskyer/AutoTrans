@@ -1,5 +1,5 @@
 module MAC_method1 #(
-    //TODO: matrix2以及bias数据排布的问题
+    
     parameter DATA_WIDTH = 'd8, //input_shape[1][0]
     parameter INPUT_SHAPE_1_1 = 'd128, //input_shape[1][1]
     parameter INPUT_SHAPE_1_2 = 'd768, //input_shape[1][2]
