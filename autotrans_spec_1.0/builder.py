@@ -74,9 +74,10 @@ def builder(mode, network_file, lib_dict):
                     address = "./autotrans_spec_1.0/op_trans/{}.v".format(name)
 
                 with open(address) as file_to_be_modified: 
+                    print(op_name)
                     content=file_to_be_modified.read()
             
- 
+                    search_name=re.compile("module\s+(.*)(?:\n)?#\s*\(")
                     for parameter in method_dict[name]: # (In libinfo.ini) "parameter" looks like 'WIDTH_ADDEND-input_shape[0][0]'
                         source_file_parameter = parameter.split('-')[0] # 'WIDTH_ADDEND'
                         test_info_parameter = parameter.split('-')[1] # 'input_shape[0][0]'
@@ -95,12 +96,13 @@ def builder(mode, network_file, lib_dict):
                         for index1,one_output_shape in enumerate(output_shape):#output部分的参数替换
                             for index2,everyParameter in enumerate(one_output_shape):
                                 if ("output_shape"+"[{}]".format(index1)+"[{}]".format(index2))== test_info_parameter:
-                                    replacement="{}".format(input_shape[index1][index2])
+                                    replacement="{}".format(output_shape[index1][index2])
                                     if ',' in search_result:
                                         content=re.sub(search, rf'parameter {source_file_parameter} = {replacement},\n',content) # find all "//input_shape[index][index]"
                                     else:
                                         content=re.sub(search, rf'parameter {source_file_parameter} = {replacement}\n',content)     
-                     
+                    content=re.sub(search_name,'module '+op_name+"_opID_"+'{}'.format(content_list[i]["op_id"])+" #( \n",content)
+                    print(content) 
                         # for index1,one_input_shape in enumerate(input_shape):
                         #     for index2,everyParameter in enumerate(one_input_shape):
                         #         print("input_shape"+"[{}]".format(index1)+"[{}]".format(index2))

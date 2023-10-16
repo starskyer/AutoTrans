@@ -9,11 +9,12 @@ module Add_method1
     input                                                           clk_p,
     input                                                           rst_n,
 //********************************* Input Signal *********************************
-    input signed  [ADDER_NUM * WIDTH_ADDEND * DIMENTION - 1   :   0]  addend1,
-    input signed  [ADDER_NUM * WIDTH_ADDEND * DIMENTION - 1   :   0]  addend2,
+    input signed  [WIDTH_ADDEND * ADDER_NUM * DIMENTION - 1   :   0]  addend1,
+    input signed  [WIDTH_ADDEND * ADDER_NUM * DIMENTION - 1   :   0]  addend2,
 
 //********************************* Output Signal *********************************
-    output signed [ADDER_NUM * WIDTH_SUM * DIMENTION - 1      :   0]  sum
+    output signed [WIDTH_SUM * ADDER_NUM * DIMENTION - 1      :   0]  sum,
+    output sum_valid
 );
     
 //********************************* Loop Integer **********************************

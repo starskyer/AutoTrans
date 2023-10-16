@@ -1,50 +1,58 @@
-[{
-    "op_id": 411,
-    "op_name": "Add_456",
-    "op_type": "Add",
-    "input": [
-        "input.116",
-        "onnx::MatMul_918"
-    ],
-    "output": [
-        "onnx::ReduceMean_995"
-    ],
-    "input_shape": [
-        [
-            32,
-            128,
-            768
+[   
+    {
+        "op_id": 22,
+        "op_name": "MAC_1",
+        "op_type": "MAC",
+        "input": [
+            "onnx::MatMul_1621",
+            "input.8",
+            "bert.encoder.layer.0.attention.self.query.bias"
         ],
-        [
-            32,
-            128,
-            768
-        ]
-    ],
-    "output_shape": [
-        [
-            32,
-            128,
-            768
-        ]
-    ],
-    "topo": {
-        "pre": [
+        "output": [
+            "mixed_query_layer"
+        ],
+        "input_shape": [
             [
-                409,
-                "MAC"
+                768,
+                768
             ],
             [
-                376,
-                "Layernorm"
+                32,
+                128,
+                768
+            ],
+            [
+                768
             ]
         ],
-        "next": [
+        "output_shape": [
             [
-                412,
-                "Layernorm"
+                32,
+                128,
+                768
             ]
-        ]
+        ],
+        "topo": {
+            "pre": [
+                [
+                    0,
+                    "Init"
+                ],
+                [
+                    10,
+                    "Layernorm"
+                ],
+                [
+                    0,
+                    "Init"
+                ]
+            ],
+            "next": [
+                [
+                    28,
+                    "Reshape"
+                ]
+            ]
+        }
     }
-}
 ]

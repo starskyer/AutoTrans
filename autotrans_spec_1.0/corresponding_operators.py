@@ -2,8 +2,8 @@ import json
 import numpy
 import re
 def corresponding_operators_function(data_information_dict,RESULT_STRING,WIDTH_IN,WIDTH_OUT,VALID_IN,VALID_OUT):
-    address="./op_trans/{}_modified.v".format(data_information_dict["op_name"])
-    with open("./op_trans/top module.v",'a+') as file:
+    address="./modified_verilog/{}_modified.v".format(data_information_dict["op_name"])
+    with open("./autotrans_spec_1.0/top module.v",'a+') as file:
         with open(address)as file2:
             content=file2.read().replace('\n', ' ')
             pattern=re.compile("module.*?\(")
@@ -39,7 +39,7 @@ def corresponding_operators_function(data_information_dict,RESULT_STRING,WIDTH_I
                 pattern_io_input_getname=re.compile(r'input\s*(?:wire\s*)?(?:signed\s*)?(?:\[[^\]]+\]\s*)?(\w+)')#分割出名字,可有可无的用?:    
                 pattern_io_input_getwidth=re.compile(r'(?:signed\s*)?\[[^\]]+\]')#分割出位宽
 
-                pattern_io_output_1=re.compile(r'output\s+\w+.*?\);')#分割出output那一块
+                pattern_io_output_1=re.compile(r'output\s+.*?\);')#分割出output那一块，原表达式为r'output\s+\w+.*?\);'
                 pattern_io_output_2=re.compile(r'([^,]+)(?:,\s*|\s*$)')#分割出几个字符串
                 pattern_io_output_getname=re.compile(r'output\s*(?:wire\s*)?(?:reg\s*)?(?:signed\s*)?(?:\[[^\]]+\]\s*)?(\w+)')#能够直接复用
                 pattern_io_output_getwidth=re.compile(r'(?:signed\s*)?\[[^\]]+\]')
@@ -47,7 +47,7 @@ def corresponding_operators_function(data_information_dict,RESULT_STRING,WIDTH_I
                 io=pattern_io.findall(content)[0]
                 parameterTXT=pattern_parameter.findall(content)[0]
                 parameterList=pattern_parameter_getlist.findall(parameterTXT)
-                print(parameterList)#拉出所有参数名和对应的值并替换后面可能用于表示和运算的此参数名,如parameter result_WIDTH = x_WIDTH + k_WIDTH + 1, 
+                #print(parameterList)#拉出所有参数名和对应的值并替换后面可能用于表示和运算的此参数名,如parameter result_WIDTH = x_WIDTH + k_WIDTH + 1, 
                 for index_this,this_sentence in enumerate(parameterList):
                     name=pattern_parameter_nameToReplace.findall(this_sentence)[0]
                     value=pattern_parameter_valueToReplace.findall(this_sentence)[0]
@@ -71,15 +71,17 @@ def corresponding_operators_function(data_information_dict,RESULT_STRING,WIDTH_I
                 #in部分
                 in_tmp=pattern_io_input.findall(   pattern_io_input_tmp.findall(io)[0]   )[0]
                 in_name=pattern_io_input_final.findall(in_tmp)
+                print(in_name)
 
                 for item in (in_name):#取得in部分的位宽
                     if '[' in item  or "signed" in item:
                         width_input.append(pattern_io_input_getwidth.findall(item)[0])
+                print(parameter_dict)
                 for i in range(len(width_input)):#把位宽换为全数字的
                     for keys,values in parameter_dict.items(): 
-                        pattern_wire_width="{}(?=\s+|$)".format(keys)
+                        pattern_wire_width=r"\b{}\b(?=\s*|$)".format(keys)
                         width_input[i]=re.sub(pattern_wire_width,'('+values+')',width_input[i])
-                #print(width_input)
+                                
                 for i in range(len(width_input)):
                     WIDTH_IN.append(width_input[i] )#加入到所有in位宽组成的大列表里
 
@@ -92,15 +94,16 @@ def corresponding_operators_function(data_information_dict,RESULT_STRING,WIDTH_I
                 #out部分
                 out_name=pattern_io_output_1.findall(io)[0]
                 out_name=pattern_io_output_2.findall(out_name)
+                print(out_name)
 
                 for item in (out_name):#取得out部分的位宽
                     if '[' in item  or "signed" in item:
                         width_output.append(pattern_io_output_getwidth.findall(item)[0])    
                 for i in range(len(width_output)):
                     for keys,values in parameter_dict.items(): 
-                        pattern_wire_width="{}(?=\s+|$)".format(keys)
+                        pattern_wire_width=r"\b{}\b(?=\s*|$)".format(keys)
                         width_output[i]=re.sub(pattern_wire_width,'('+values+')',width_output[i])  
-
+                #
                 for i in range(len(width_output)):  
                     WIDTH_OUT.append(width_output[i])#加入到所有in位宽组成的列表里
 
@@ -109,7 +112,7 @@ def corresponding_operators_function(data_information_dict,RESULT_STRING,WIDTH_I
                     out_name[index]=pattern_io_output_getname.findall(item)[0]
                 
                 
-                
+                print(data_information_dict["op_name"])
                 code_string=standard_module_name+"  "+data_information_dict["op_name"]+"\n"#第一行
                 code_string=code_string+"("+"\n"
                 for i in range(len(in_name)):#输入
@@ -117,32 +120,37 @@ def corresponding_operators_function(data_information_dict,RESULT_STRING,WIDTH_I
                         code_string=code_string+"\t"+"."+in_name[i]+"({contents1})".format(contents1=data_information_dict["input"][count_for_input].translate(str.maketrans({'.': '_'})).replace("onnx::","onnx_"))+","+"\n"
                         count_for_input+=1
                     else:
-                        code_string=code_string+"\t"+'.'+in_name[i]+"({})".format(in_name[i])+","+"\n"
-                        if('en' in in_name[i] or 'valid'  in in_name[i] ):#将所有输入使能信号加入valid_in里
-                            valid_in.append(in_name[i])
-
+                        if('clk' in in_name[i] or 'rst_n'  in in_name[i] ):#clk and rst_n
+                            code_string=code_string+"\t"+'.'+in_name[i]+"({})".format(in_name[i])+","+"\n"
+                        else:#将所有输入使能信号加入valid_in里
+                            code_string=code_string+"\t"+'.'+in_name[i]+"({})".format(in_name[i]+'_'+data_information_dict['op_name'])+","+"\n"
+                            valid_in.append(in_name[i]+'_'+data_information_dict['op_name'])
                       
-                print(out_name)
+                
                 for i in range(len(out_name)):#输出
                     if(i!=len(out_name)-1):#如果输出不是最后一行,那么要加逗号, 比如'.softmax_quant(input_16),',最后一行则不用加
                         if('enable'not in out_name[i] and 'valid' not in out_name[i] and 'clk' not in out_name[i] and 'rst_n' not in out_name[i]):
                             code_string=code_string+'\t'+"."+out_name[i]+"({contents2})".format(contents2=data_information_dict["output"][count_for_output].translate(str.maketrans({'.': '_'})).replace("onnx::","onnx_"))+","+"\n"
                             count_for_output+=1
                         else:
-                            code_string=code_string+"\t"+'.'+out_name[i]+"({})".format(out_name[i])+","+"\n"
-                            if('en' in out_name[i] or 'valid'  in out_name[i] ):#将所有输出使能信号加入valid_out里
-                                valid_out.append(out_name[i])
-                    else:
+                            if('clk' in out_name[i] or 'rst_n'  in out_name[i] ):#clk and rst_n
+                                code_string=code_string+"\t"+'.'+out_name[i]+"({})".format(out_name[i])+","+"\n"
+                            else:#将所有输出使能信号加入valid_out里
+                                code_string=code_string+"\t"+'.'+out_name[i]+"({})".format(out_name[i]+'_'+data_information_dict['op_name'])+","+"\n"
+                                valid_out.append(out_name[i]+'_'+data_information_dict['op_name'])
+                    else:#以下不用加逗号
                         if('enable'not in out_name[i] and 'valid' not in out_name[i] and 'clk' not in out_name[i] and 'rst_n' not in out_name[i]):
                             code_string=code_string+'\t'+"."+out_name[i]+"({contents2})".format(contents2=data_information_dict["output"][count_for_output].translate(str.maketrans({'.': '_'})).replace("onnx::","onnx_"))+"\n"
                             count_for_output+=1
                         else:
-                            code_string=code_string+"\t"+'.'+out_name[i]+"({})".format(out_name[i])+"\n"
-                            if('en' in out_name[i] or 'valid'  in out_name[i] ):#将所有输出使能信号加入valid_out里
-                                valid_out.append(out_name[i])
-                print(valid_out)
-                VALID_IN.append(valid_in)
-                VALID_OUT.append(valid_out)
+                            if('clk' in out_name[i] or 'rst_n'  in out_name[i] ):#clk and rst_n
+                                code_string=code_string+"\t"+'.'+out_name[i]+"({})".format(out_name[i])+"\n"
+                            else:#将所有输出使能信号加入valid_out里
+                                code_string=code_string+"\t"+'.'+out_name[i]+"({})".format(out_name[i]+'_'+data_information_dict['op_name'])+"\n"
+                                valid_out.append(out_name[i]+'_'+data_information_dict['op_name'])
+                #print(RESULT_STRING)
+                VALID_IN[data_information_dict['op_id']]=valid_in
+                VALID_OUT[data_information_dict['op_id']]=valid_out
                 code_string=code_string+");"+"\n"
                 RESULT_STRING.append(code_string)
             
@@ -168,7 +176,7 @@ def corresponding_operators_function(data_information_dict,RESULT_STRING,WIDTH_I
                 pattern_io_input_getname=re.compile(r'input\s*(?:wire\s*)?(?:signed\s*)?(?:\[[^\]]+\]\s*)?(\w+)')#分割出名字,可有可无的用?:    
                 pattern_io_input_getwidth=re.compile(r'(?:signed\s*)?\[[^\]]+\]')#分割出位宽
 
-                pattern_io_output_1=re.compile(r'output\s+\w+.*?\);')#分割出output那一块
+                pattern_io_output_1=re.compile(r'output\s+.*?\);')#分割出output那一块，原表达式为r'output\s+\w+.*?\);'
                 pattern_io_output_2=re.compile(r'([^,]+)(?:,\s*|\s*$)')#分割出几个字符串
                 pattern_io_output_getname=re.compile(r'output\s*(?:wire\s*)?(?:reg\s*)?(?:signed\s*)?(?:\[[^\]]+\]\s*)?(\w+)')#能够直接复用
                 pattern_io_output_getwidth=re.compile(r'(?:signed\s*)?\[[^\]]+\]')
@@ -176,7 +184,7 @@ def corresponding_operators_function(data_information_dict,RESULT_STRING,WIDTH_I
                 io=pattern_io.findall(content)[0]
                 parameterTXT=pattern_parameter.findall(content)[0]
                 parameterList=pattern_parameter_getlist.findall(parameterTXT)
-                print(parameterList)#拉出所有参数名和对应的值并替换后面可能用于表示和运算的此参数名,如parameter result_WIDTH = x_WIDTH + k_WIDTH + 1, 
+                #print(parameterList)#拉出所有参数名和对应的值并替换后面可能用于表示和运算的此参数名,如parameter result_WIDTH = x_WIDTH + k_WIDTH + 1, 
                 for index_this,this_sentence in enumerate(parameterList):
                     name=pattern_parameter_nameToReplace.findall(this_sentence)[0]
                     value=pattern_parameter_valueToReplace.findall(this_sentence)[0]
@@ -200,15 +208,17 @@ def corresponding_operators_function(data_information_dict,RESULT_STRING,WIDTH_I
                 #in部分
                 in_tmp=pattern_io_input.findall(   pattern_io_input_tmp.findall(io)[0]   )[0]
                 in_name=pattern_io_input_final.findall(in_tmp)
+                print(in_name)
 
                 for item in (in_name):#取得in部分的位宽
                     if '[' in item  or "signed" in item:
                         width_input.append(pattern_io_input_getwidth.findall(item)[0])
+                print(parameter_dict)
                 for i in range(len(width_input)):#把位宽换为全数字的
                     for keys,values in parameter_dict.items(): 
-                        pattern_wire_width="{}(?=\s+|$)".format(keys)
+                        pattern_wire_width=r"\b{}\b(?=\s*|$)".format(keys)
                         width_input[i]=re.sub(pattern_wire_width,'('+values+')',width_input[i])
-                #print(width_input)
+                                
                 for i in range(len(width_input)):
                     WIDTH_IN.append(width_input[i] )#加入到所有in位宽组成的大列表里
 
@@ -221,15 +231,16 @@ def corresponding_operators_function(data_information_dict,RESULT_STRING,WIDTH_I
                 #out部分
                 out_name=pattern_io_output_1.findall(io)[0]
                 out_name=pattern_io_output_2.findall(out_name)
+                print(out_name)
 
                 for item in (out_name):#取得out部分的位宽
                     if '[' in item  or "signed" in item:
                         width_output.append(pattern_io_output_getwidth.findall(item)[0])    
                 for i in range(len(width_output)):
                     for keys,values in parameter_dict.items(): 
-                        pattern_wire_width="{}(?=\s+|$)".format(keys)
+                        pattern_wire_width=r"\b{}\b(?=\s*|$)".format(keys)
                         width_output[i]=re.sub(pattern_wire_width,'('+values+')',width_output[i])  
-
+                #
                 for i in range(len(width_output)):  
                     WIDTH_OUT.append(width_output[i])#加入到所有in位宽组成的列表里
 
@@ -238,40 +249,45 @@ def corresponding_operators_function(data_information_dict,RESULT_STRING,WIDTH_I
                     out_name[index]=pattern_io_output_getname.findall(item)[0]
                 
                 
-                
-                code_string=standard_module_name+"  "+data_information_dict["topo"]["name"]+"\n"#第一行
+                print(data_information_dict["op_name"])
+                code_string=standard_module_name+"  "+data_information_dict["op_name"]+"\n"#第一行
                 code_string=code_string+"("+"\n"
                 for i in range(len(in_name)):#输入
                     if('enable'not in in_name[i] and 'valid' not in in_name[i]  and 'clk' not in in_name[i]  and 'rst_n' not in in_name[i]):
-                        code_string=code_string+"\t"+"."+in_name[i]+"({contents1})".format(contents1=data_information_dict["topo"]["input"][count_for_input].translate(str.maketrans({'.': '_'})).replace("onnx::","onnx_"))+","+"\n"
+                        code_string=code_string+"\t"+"."+in_name[i]+"({contents1})".format(contents1=data_information_dict["input"][count_for_input].translate(str.maketrans({'.': '_'})).replace("onnx::","onnx_"))+","+"\n"
                         count_for_input+=1
                     else:
-                        code_string=code_string+"\t"+'.'+in_name[i]+"({})".format(in_name[i])+","+"\n"
-                        if('en' in in_name[i] or 'valid'  in in_name[i] ):#将所有输入使能信号加入valid_in里
-                            valid_in.append(in_name[i])
-
+                        if('clk' in in_name[i] or 'rst_n'  in in_name[i] ):#clk and rst_n
+                            code_string=code_string+"\t"+'.'+in_name[i]+"({})".format(in_name[i])+","+"\n"
+                        else:#将所有输入使能信号加入valid_in里
+                            code_string=code_string+"\t"+'.'+in_name[i]+"({})".format(in_name[i]+'_'+data_information_dict['op_name'])+","+"\n"
+                            valid_in.append(in_name[i]+'_'+data_information_dict['op_name'])
                       
-                print(out_name)
+                
                 for i in range(len(out_name)):#输出
                     if(i!=len(out_name)-1):#如果输出不是最后一行,那么要加逗号, 比如'.softmax_quant(input_16),',最后一行则不用加
                         if('enable'not in out_name[i] and 'valid' not in out_name[i] and 'clk' not in out_name[i] and 'rst_n' not in out_name[i]):
-                            code_string=code_string+'\t'+"."+out_name[i]+"({contents2})".format(contents2=data_information_dict["topo"]["output"][count_for_output].translate(str.maketrans({'.': '_'})).replace("onnx::","onnx_"))+","+"\n"
+                            code_string=code_string+'\t'+"."+out_name[i]+"({contents2})".format(contents2=data_information_dict["output"][count_for_output].translate(str.maketrans({'.': '_'})).replace("onnx::","onnx_"))+","+"\n"
                             count_for_output+=1
                         else:
-                            code_string=code_string+"\t"+'.'+out_name[i]+"({})".format(out_name[i])+","+"\n"
-                            if('en' in out_name[i] or 'valid'  in out_name[i] ):#将所有输出使能信号加入valid_out里
-                                valid_out.append(out_name[i])
-                    else:
+                            if('clk' in out_name[i] or 'rst_n'  in out_name[i] ):#clk and rst_n
+                                code_string=code_string+"\t"+'.'+out_name[i]+"({})".format(out_name[i])+","+"\n"
+                            else:#将所有输出使能信号加入valid_out里
+                                code_string=code_string+"\t"+'.'+out_name[i]+"({})".format(out_name[i]+'_'+data_information_dict['op_name'])+","+"\n"
+                                valid_out.append(out_name[i]+'_'+data_information_dict['op_name'])
+                    else:#以下不用加逗号
                         if('enable'not in out_name[i] and 'valid' not in out_name[i] and 'clk' not in out_name[i] and 'rst_n' not in out_name[i]):
-                            code_string=code_string+'\t'+"."+out_name[i]+"({contents2})".format(contents2=data_information_dict["topo"]["output"][count_for_output].translate(str.maketrans({'.': '_'})).replace("onnx::","onnx_"))+"\n"
+                            code_string=code_string+'\t'+"."+out_name[i]+"({contents2})".format(contents2=data_information_dict["output"][count_for_output].translate(str.maketrans({'.': '_'})).replace("onnx::","onnx_"))+"\n"
                             count_for_output+=1
                         else:
-                            code_string=code_string+"\t"+'.'+out_name[i]+"({})".format(out_name[i])+"\n"
-                            if('en' in out_name[i] or 'valid'  in out_name[i] ):#将所有输出使能信号加入valid_out里
-                                valid_out.append(out_name[i])
-                print(valid_out)
-                VALID_IN.append(valid_in)
-                VALID_OUT.append(valid_out)
+                            if('clk' in out_name[i] or 'rst_n'  in out_name[i] ):#clk and rst_n
+                                code_string=code_string+"\t"+'.'+out_name[i]+"({})".format(out_name[i])+"\n"
+                            else:#将所有输出使能信号加入valid_out里
+                                code_string=code_string+"\t"+'.'+out_name[i]+"({})".format(out_name[i]+'_'+data_information_dict['op_name'])+"\n"
+                                valid_out.append(out_name[i]+'_'+data_information_dict['op_name'])
+                #print(RESULT_STRING)
+                VALID_IN[data_information_dict['op_id']]=valid_in
+                VALID_OUT[data_information_dict['op_id']]=valid_out
                 code_string=code_string+");"+"\n"
                 RESULT_STRING.append(code_string)
 

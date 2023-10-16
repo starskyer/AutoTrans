@@ -1,5 +1,5 @@
 module Gelu_method1
-#(  //TODO:多余信号的问题
+#( 
     parameter GELU_NUM = 128, //input_shape[0][1]
     parameter DIMENTION = 64, //input_shape[0][2]
     parameter x_WIDTH = 8, //input_shape[0][0]
@@ -9,12 +9,10 @@ module Gelu_method1
     parameter bp_NUM = 16,   //breakpoint
     parameter OUTPUT_WIDTH = 8  
 )(
-    // input signal
     input                                                            clk_p,
     input                                                            rst_n,
     input       signed  [x_WIDTH * GELU_NUM * DIMENTION - 1 : 0]     x,  
     input                                                            input_valid_n,
-    // output signal
     output wire signed  [OUTPUT_WIDTH * GELU_NUM * DIMENTION - 1:0]  gelu,
     output wire                                                      gelu_valid_n
 );
