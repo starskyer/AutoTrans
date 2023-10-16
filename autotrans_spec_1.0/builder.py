@@ -22,8 +22,8 @@ def read_libinfo(libinfo_file):
         for opt in conf.options(sec):
             value = conf.get(sec, opt) # for example: value = 'input_shape, output_shape'
             value_list = value.split(',') # for example: value = ['input_shape', ' output_shape']
-            for string in value_list:
-                string = string.lstrip() # remove any whitespace at the beginning of the string
+            value_list = [string.replace("\n", "").replace(" ", "") for string in value_list]
+            # remove any whitespace and enterspace at the beginning of the string
             lib_dict[sec].update({opt:value_list})
 
     return lib_dict
@@ -129,12 +129,6 @@ def builder(mode, network_file, lib_dict):
                         #                     content = re.sub(pattern_a,"={}".format(output_shape[index1][index2]),content)
                                         
                     modified_file.write(content) # write comment into modified file
-
-                             
-                            
-                    
-
-
 
 
 def main():
