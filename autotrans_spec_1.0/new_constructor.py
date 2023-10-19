@@ -28,8 +28,8 @@ class constructor(object):
 
         for  index,data_information_dict in enumerate(data):
             corresponding_operators_function(data_information_dict,RESULT_STRING,WIDTH_IN,WIDTH_OUT,VALID_IN,VALID_OUT)
-        print(VALID_OUT)
-        print(VALID_IN)
+        #print(VALID_OUT)
+        #print(VALID_IN)
 
         #automation
         for data_information_dict in data:#顺序遍历输出字典
@@ -51,11 +51,28 @@ class constructor(object):
         for index,item_in in enumerate(input_dict):
             input_dict[index]="input"+"\t"+"{}".format(WIDTH_IN[index])+item_in.translate(str.maketrans({'.': '_'})).replace("onnx::","onnx_")
         #注意一定要加完width之后才能去去除相同元素的操作
-        #去除相同元素
+        #简单去除相同元素
+        record=[]
+        unique_list_firstStep=[]
         unique_list=[]
         for x in input_dict:
-            if x not in unique_list:
+            if x not in unique_list_firstStep:
+                unique_list_firstStep.append(x)
+        print(unique_list_firstStep)
+        #改变去重方式为直接查看变量名,一样的话不管位宽在表示上是32 * 128 * 768和32 * 768 * 128都是同一个变量
+        for  index_unique_list,y in enumerate(unique_list_firstStep):
+            for index_z,z in enumerate(unique_list_firstStep[index_unique_list+1:],start=index_unique_list+1):
+                if y.split("]")  [-1]==z.split("]")  [-1]:
+                    record.append(index_z)
+        #record记录下所有重复的序号,不在这个序号列表里的才append进unique_list
+  
+        for index,x in enumerate(unique_list_firstStep):
+            if index not in record:
                 unique_list.append(x)
+        print(unique_list)           
+                    
+
+
 
         for index,element_in in enumerate(unique_list):#再筛查去掉input和output重复的信号
             flag=0#flag等于0表示没有和他一样的
@@ -125,16 +142,7 @@ class constructor(object):
                                         file.write(thisModuleOutputV+" ;"+'\n') 
                                     else:             
                                         file.write(thisModuleOutputV+" & ")
-            # for index,i in enumerate(VALID_IN[1:len(VALID_IN)],start=1):
-            #     for i_content in i:
-            #         file.write("assign  "+i_content+"=")
-            #         num=0
-            #         for num in range(len(VALID_OUT[index-1])):
-            #             j= VALID_OUT[index-1][num]
-            #             if num != len(VALID_OUT[index-1])-1:
-            #                 file.write(' '+j+' '+'&'+' ')s
-            #             else:
-            #                 file.write(j+';'+'\n')
+ 
             
             #模块调用
             for content in RESULT_STRING:
