@@ -52,6 +52,7 @@ class builder_a(object):
                 output_shape = content_list[i]["output_shape"] # list
                 op_name=content_list[i]["op_name"] # string
                 op_id=content_list[i]['op_id']
+                op_type=content_list[i]["op_type"]
                 flag_whether_inSM=0
                 #id在split_merge之间,那么
                 for id_couple in split_merge_couple:
@@ -99,7 +100,16 @@ class builder_a(object):
                             test_info_parameter = parameter.split('-')[1] # 'input_shape[0][0]'
                             print(source_file_parameter)
                             search=re.compile("parameter\s*"+source_file_parameter+"\s*=\s*(.*)?(?:\s*)(?:\n)") # Regular expression finds "input_shape[index][index]" in the comments
+                            search_for_headNum=re.compile("parameter\s*"+"HEAD_NUM"+"\s*=\s*(.*)?(?:\s*)(?:\n)")
                             search_result=search.findall(content)[0]
+                            if op_type=='Split' or op_type=="Merge":
+                                #head_num替换
+                                head_num_string=search_for_headNum.findall(content)[0]
+                                if ',' in head_num_string:
+                                    content=re.sub(search_for_headNum, rf'parameter HEAD_NUM = {head_num},\n',content) 
+                                else:
+                                    content=re.sub(search_for_headNum, rf'parameter HEAD_NUM = {head_num}\n',content) 
+                                print(content)
                             for index1,one_input_shape in enumerate(input_shape):#input部分的参数替换
                                 for index2,everyParameter in enumerate(one_input_shape):
                                     if ("input_shape"+"[{}]".format(index1)+"[{}]".format(index2))== test_info_parameter:
