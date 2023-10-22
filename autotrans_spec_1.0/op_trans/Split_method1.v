@@ -5,7 +5,7 @@ module Split_method1 #(
     parameter OUTPUT_SHAPE_1 = 'd128, //output_shape[0][1]
     parameter OUTPUT_SHAPE_2 = 'd12, //output_shape[0][2]
     parameter OUTPUT_SHAPE_3 = 'd64, //output_shape[0][3]
-    parameter NUM_WIDTH = 'd4 //input_shape[1]
+    parameter NUM_WIDTH = 'd4 //input_shape[1][0]
 )
 (
     //********************************* System Signal *********************************

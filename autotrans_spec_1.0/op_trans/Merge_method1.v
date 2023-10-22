@@ -5,7 +5,7 @@ module Merge_method1 #(
     parameter INPUT_SHAPE_3 = 'd64, //input_shape[0][3]
     parameter OUTPUT_SHAPE_1 = 'd128, //output_shape[0][1]
     parameter OUTPUT_SHAPE_2 = 'd768, //output_shape[0][2]
-    parameter NUM_WIDTH = 'd3 //input_shape[1]
+    parameter NUM_WIDTH = 'd3 //input_shape[1][0]
 )
 (
     //********************************* System Signal *********************************
