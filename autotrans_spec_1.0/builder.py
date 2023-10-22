@@ -29,18 +29,34 @@ class builder_a(object):
         return lib_dict
 
     # use "class builder" includes some methods
-    def builder(mode, network_file, lib_dict):
+    def builder(mode, network_file, lib_dict,head_num):
         # find operator in lib_dict
         with open(network_file, "r") as file:
             content_list = json.load(file)
+            split_merge_couple=[]
+            for index,j in enumerate(content_list):#获取split和merge的op_id对
+                    assist=[]
+                    if j["op_type"]=='Split':
+                        assist.append(j['op_id'])
+                        for index_sub,j in enumerate(content_list[index+1:],start=index+1):
+                            if j['op_type']=='Merge':
+                                assist.append(j['op_id'])
+                                split_merge_couple.append(assist)
+                                break
+            print(split_merge_couple)
+
             for i in range(len(content_list)): # content_list[i] represents an operator
                 optype = content_list[i]["op_type"]
                 # optypes in high_level: 'MAC', 'Split', 'Transpose', 'MatMul', 'Softmax', 'Merge', 'Add', 'Layernorm', 'Gelu'
                 input_shape= content_list[i]["input_shape"] # list
                 output_shape = content_list[i]["output_shape"] # list
                 op_name=content_list[i]["op_name"] # string
-
-
+                op_id=content_list[i]['op_id']
+                flag_whether_inSM=0
+                #id在split_merge之间,那么
+                for id_couple in split_merge_couple:
+                    if op_id>=id_couple[0] and op_id<=id_couple[1]:
+                        flag_whether_inSM=1
 
                 found = 0
                 method_dict = {}
@@ -76,7 +92,7 @@ class builder_a(object):
                     with open(address) as file_to_be_modified: 
                         print(op_name)
                         content=file_to_be_modified.read()
-                
+                        
                         search_name=re.compile("module\s+(.*)(?:\n)?#\s*\(")
                         for parameter in method_dict[name]: # (In libinfo.ini) "parameter" looks like 'WIDTH_ADDEND-input_shape[0][0]'
                             source_file_parameter = parameter.split('-')[0] # 'WIDTH_ADDEND'
@@ -87,7 +103,11 @@ class builder_a(object):
                             for index1,one_input_shape in enumerate(input_shape):#input部分的参数替换
                                 for index2,everyParameter in enumerate(one_input_shape):
                                     if ("input_shape"+"[{}]".format(index1)+"[{}]".format(index2))== test_info_parameter:
-                                        replacement="{}".format(input_shape[index1][index2])
+                                        if input_shape[index1][index2]==12 and flag_whether_inSM==1:
+                                            replacement="{}".format(head_num)
+                                        else:
+                                            replacement="{}".format(input_shape[index1][index2])
+
                                         if ',' in search_result:
                                             content=re.sub(search, rf'parameter {source_file_parameter} = {replacement},\n',content) # find all "//input_shape[index][index]"
                                         else:
@@ -96,7 +116,10 @@ class builder_a(object):
                             for index1,one_output_shape in enumerate(output_shape):#output部分的参数替换
                                 for index2,everyParameter in enumerate(one_output_shape):
                                     if ("output_shape"+"[{}]".format(index1)+"[{}]".format(index2))== test_info_parameter:
-                                        replacement="{}".format(output_shape[index1][index2])
+                                        if output_shape[index1][index2]==12 and flag_whether_inSM==1:
+                                            replacement="{}".format(head_num)
+                                        else:
+                                            replacement="{}".format(output_shape[index1][index2])
                                         if ',' in search_result:
                                             content=re.sub(search, rf'parameter {source_file_parameter} = {replacement},\n',content) # find all "//input_shape[index][index]"
                                         else:
@@ -136,7 +159,7 @@ class builder_a(object):
 def main():
     test=builder_a
     lib_dict = test.read_libinfo("autotrans_spec_1.0/libinfo.ini")
-    test.builder("code","autotrans_spec_1.0/test_info.json",lib_dict)  
+    test.builder("code","autotrans_spec_1.0/test_info.json",lib_dict,4)  
     print(lib_dict)
 
 

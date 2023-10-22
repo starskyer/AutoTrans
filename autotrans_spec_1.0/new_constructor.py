@@ -12,7 +12,6 @@ class constructor(object):
     def func():
         with open('autotrans_spec_1.0/test_info.json') as f:
             data=json.load(f)
-
         in_name=[]
         out_name=[]
         output_dict=[]#全部都是wire类型
