@@ -71,12 +71,12 @@ def corresponding_operators_function(data_information_dict,RESULT_STRING,WIDTH_I
                 #in部分
                 in_tmp=pattern_io_input.findall(   pattern_io_input_tmp.findall(io)[0]   )[0]
                 in_name=pattern_io_input_final.findall(in_tmp)
-                print(in_name)
+                #print(in_name)
 
                 for item in (in_name):#取得in部分的位宽
                     if '[' in item  or "signed" in item:
                         width_input.append(pattern_io_input_getwidth.findall(item)[0])
-                print(parameter_dict)
+                #print(parameter_dict)
                 for i in range(len(width_input)):#把位宽换为全数字的
                     for keys,values in parameter_dict.items(): 
                         pattern_wire_width=r"\b{}\b(?=\s*|$)".format(keys)
@@ -94,7 +94,7 @@ def corresponding_operators_function(data_information_dict,RESULT_STRING,WIDTH_I
                 #out部分
                 out_name=pattern_io_output_1.findall(io)[0]
                 out_name=pattern_io_output_2.findall(out_name)
-                print(out_name)
+                #print(out_name)
 
                 for item in (out_name):#取得out部分的位宽
                     if '[' in item  or "signed" in item:
@@ -112,7 +112,7 @@ def corresponding_operators_function(data_information_dict,RESULT_STRING,WIDTH_I
                     out_name[index]=pattern_io_output_getname.findall(item)[0]
                 
                 
-                print(data_information_dict["op_name"])
+                #print(data_information_dict["op_name"])
                 code_string=standard_module_name+"  "+data_information_dict["op_name"]+"\n"#第一行
                 code_string=code_string+"("+"\n"
                 for i in range(len(in_name)):#输入
@@ -208,12 +208,12 @@ def corresponding_operators_function(data_information_dict,RESULT_STRING,WIDTH_I
                 #in部分
                 in_tmp=pattern_io_input.findall(   pattern_io_input_tmp.findall(io)[0]   )[0]
                 in_name=pattern_io_input_final.findall(in_tmp)
-                print(in_name)
+                #print(in_name)
 
                 for item in (in_name):#取得in部分的位宽
                     if '[' in item  or "signed" in item:
                         width_input.append(pattern_io_input_getwidth.findall(item)[0])
-                print(parameter_dict)
+                #print(parameter_dict)
                 for i in range(len(width_input)):#把位宽换为全数字的
                     for keys,values in parameter_dict.items(): 
                         pattern_wire_width=r"\b{}\b(?=\s*|$)".format(keys)
@@ -231,7 +231,7 @@ def corresponding_operators_function(data_information_dict,RESULT_STRING,WIDTH_I
                 #out部分
                 out_name=pattern_io_output_1.findall(io)[0]
                 out_name=pattern_io_output_2.findall(out_name)
-                print(out_name)
+                #print(out_name)
 
                 for item in (out_name):#取得out部分的位宽
                     if '[' in item  or "signed" in item:
@@ -249,7 +249,7 @@ def corresponding_operators_function(data_information_dict,RESULT_STRING,WIDTH_I
                     out_name[index]=pattern_io_output_getname.findall(item)[0]
                 
                 
-                print(data_information_dict["op_name"])
+                #print(data_information_dict["op_name"])
                 code_string=standard_module_name+"  "+data_information_dict["op_name"]+"\n"#第一行
                 code_string=code_string+"("+"\n"
                 for i in range(len(in_name)):#输入
