@@ -1,8 +1,8 @@
-module floatReciprocal(number,enable,clk,output_rec,ack);
+module floatReciprocal(number,enable,clk_p,output_rec,ack);
 
 parameter DATA_WIDTH=32;
 input [DATA_WIDTH-1:0] number; //the number that we need to get the 1/number of
-input clk,enable; 
+input clk_p,enable; 
 output reg[DATA_WIDTH-1:0] output_rec; // = 1/number
 output reg ack;
 
@@ -34,7 +34,7 @@ floatAdd FADD2 (mux,out2,Xip1); //Xi+Xi*(1-D*Xi)
 end*/
 
 
-always @ (negedge clk) begin
+always @ (negedge clk_p) begin
 	if (enable==1'b0) begin
 		mux=Xi;
 		ack=1'b0;

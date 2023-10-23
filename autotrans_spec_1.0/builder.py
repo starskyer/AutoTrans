@@ -29,7 +29,7 @@ class builder_a(object):
         return lib_dict
 
     # use "class builder" includes some methods
-    def builder(mode, network_file, lib_dict,head_num):
+    def builder(mode, network_file, lib_dict, head_num):
         # find operator in lib_dict
         with open(network_file, "r") as file:
             content_list = json.load(file)
@@ -102,14 +102,21 @@ class builder_a(object):
                             search=re.compile("parameter\s*"+source_file_parameter+"\s*=\s*(.*)?(?:\s*)(?:\n)") # Regular expression finds "input_shape[index][index]" in the comments
                             search_for_headNum=re.compile("parameter\s*"+"HEAD_NUM"+"\s*=\s*(.*)?(?:\s*)(?:\n)")
                             search_result=search.findall(content)[0]
-                            if op_type=='Split' or op_type=="Merge":
+                            if op_type=='Split':
                                 #head_num替换
                                 head_num_string=search_for_headNum.findall(content)[0]
                                 if ',' in head_num_string:
-                                    content=re.sub(search_for_headNum, rf'parameter HEAD_NUM = {head_num},\n',content) 
+                                    content=re.sub(search_for_headNum, rf'parameter HEAD_NUM = {output_shape[0][2]},\n',content) 
                                 else:
-                                    content=re.sub(search_for_headNum, rf'parameter HEAD_NUM = {head_num}\n',content) 
-                                print(content)
+                                    content=re.sub(search_for_headNum, rf'parameter HEAD_NUM = {output_shape[0][2]}\n',content) 
+                            if op_type=='Merge':
+                                #head_num替换
+                                head_num_string=search_for_headNum.findall(content)[0]
+                                if ',' in head_num_string:
+                                    content=re.sub(search_for_headNum, rf'parameter HEAD_NUM = {input_shape[0][2]},\n',content) 
+                                else:
+                                    content=re.sub(search_for_headNum, rf'parameter HEAD_NUM = {input_shape[0][2]}\n',content) 
+                           
                             for index1,one_input_shape in enumerate(input_shape):#input部分的参数替换
                                 for index2,everyParameter in enumerate(one_input_shape):
                                     if ("input_shape"+"[{}]".format(index1)+"[{}]".format(index2))== test_info_parameter:

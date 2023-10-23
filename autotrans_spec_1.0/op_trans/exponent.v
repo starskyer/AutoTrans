@@ -1,8 +1,8 @@
-module exponent (x,clk,enable,output_exp,ack);
+module exponent (x,clk_p,enable,output_exp,ack);
 parameter DATA_WIDTH=32;
 localparam taylor_iter=7;
 input [DATA_WIDTH-1:0] x;
-input clk;
+input clk_p;
 input enable;
 output reg ack;
 output reg [DATA_WIDTH-1:0] output_exp;
@@ -19,7 +19,7 @@ floatMult FM1 (mult1,one_or_x,out_m1);
 floatMult FM2 (out_m1,divisors[31:0],out_m2); 
 floatAdd FADD1 (out_m2,out_reg,output_add1); 
 
-always @ (posedge clk) begin
+always @ (posedge clk_p) begin
     if(enable==1'b0) begin
         one_or_x=32'b00111111100000000000000000000000; //initially 1
         mult1=32'b00111111100000000000000000000000; //initially 1

@@ -13,7 +13,7 @@ module Layernorm_method1
     input                                   [INPUT_WIDTH * SENTENCE_NUM*INPUT_NUM - 1 : 0]       data,
     input                                                                           data_valid_n,
     input                                   [INPUT_WIDTH *SENTENCE_NUM* INPUT_NUM - 1 : 0]       w,
-    input                                                                         w_valid_n,
+    input                                                                           w_valid_n,
     input                                   [INPUT_WIDTH *SENTENCE_NUM* INPUT_NUM - 1 : 0]       b,
     input                                                                                       b_valid_n,
 //*************************************** Output signal ***************************************//
