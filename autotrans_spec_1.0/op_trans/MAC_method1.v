@@ -34,7 +34,7 @@ u_matmul (.clk_p(clk_p), .rst_n(rst_n), .matrix1(matrix1), .matrix2(matrix2), .m
 generate
     for(i = 0; i < BIAS_WIDTH; i = i + 1) begin
         for(j = 0; j < OUTPUT_SHAPE_1; j = j + 1) begin
-            bias_matrix[(i * OUTPUT_SHAPE_1 + j + 1) * DATA_WIDTH - 1 : (i * OUTPUT_SHAPE_1 + j) * DATA_WIDTH] = bias[(i + 1) * DATA_WIDTH - 1 : i * DATA_WIDTH];
+            assign bias_matrix[(i * OUTPUT_SHAPE_1 + j + 1) * DATA_WIDTH - 1 : (i * OUTPUT_SHAPE_1 + j) * DATA_WIDTH] = bias[(i + 1) * DATA_WIDTH - 1 : i * DATA_WIDTH];
         end
     end
 endgenerate
