@@ -176,7 +176,7 @@ class builder_a(object):
 def main():
     test=builder_a
     lib_dict = test.read_libinfo("autotrans_spec_1.0/libinfo.ini")
-    test.builder("code","autotrans_spec_1.0/test_info.json",lib_dict,4)  
+    test.builder("code","autotrans_spec_1.0/test.json",lib_dict,4)  
     print(lib_dict)
 
 

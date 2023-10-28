@@ -25,7 +25,7 @@ generate
     for(i = 0; i < INPUT_SHAPE_1_1; i = i + 1) begin
         for(j = 0; j < INPUT_SHAPE_2_2; j = j + 1) begin
             for(k = 0; k < INPUT_SHAPE_1_2; k = k + 1) begin
-                mul[(i * OUTPUT_SHAPE_2 + j + 1) * DATA_WIDTH - 1 : (i * OUTPUT_SHAPE_2 + j) * DATA_WIDTH]
+                assign mul[(i * OUTPUT_SHAPE_2 + j + 1) * DATA_WIDTH - 1 : (i * OUTPUT_SHAPE_2 + j) * DATA_WIDTH]
                 = matrix1[(i * INPUT_SHAPE_1_2 + k + 1) * DATA_WIDTH - 1 : (i * INPUT_SHAPE_1_2 + k) * DATA_WIDTH]
                 * matrix2[(k * INPUT_SHAPE_2_2 + j + 1) * DATA_WIDTH - 1 : (k * INPUT_SHAPE_2_2 + j) * DATA_WIDTH];
             end

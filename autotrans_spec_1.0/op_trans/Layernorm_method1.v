@@ -18,7 +18,7 @@ module Layernorm_method1
     input                                                                                       b_valid_n,
 //*************************************** Output signal ***************************************//
     output                                  [OUTPUT_WIDTH * SENTENCE_NUM* INPUT_NUM- 1 :0]       result,
-    output                  reg                                                     result_valid_n    
+    output                                                                       result_valid_n    
 );
 genvar i;
 

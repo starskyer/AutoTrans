@@ -33,7 +33,7 @@ module softmax_matrix
             assign softmax_matrix[(i + 1) * DATA_WIDTH * OUTPUT_SHAPE_2 - 1 : i * DATA_WIDTH * OUTPUT_SHAPE_2] = softmax_matrix_mem[i];
             softmax #(.DATA_WIDTH(DATA_WIDTH), .INPUT_NUM(INPUT_SHAPE_2), .OUTPUT_NUM(OUTPUT_SHAPE_2))
             u_softmax (.clk_p(clk_p), .rst_n(rst_n), .inputs(matrix_mem[i]), .input_valid_n(input_valid_n),
-                       .outputs(softmax_matrix_mem[i], .output_valid_n(output_block_valid_n[i])));
+                       .outputs(softmax_matrix_mem[i]), .output_valid_n(output_block_valid_n[i]));
         end
     endgenerate
 

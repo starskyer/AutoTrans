@@ -21,13 +21,18 @@ module Gelu_method1
 wire    signed      [x_WIDTH * DIMENTION - 1 : 0]           x_mem           [GELU_NUM - 1 : 0];
 wire    signed      [OUTPUT_WIDTH * DIMENTION - 1 : 0]      gelu_mem        [GELU_NUM - 1 : 0];
 wire                [GELU_NUM - 1 : 0]                      gelu_block_valid_n;
+reg                                                         en_p1_n;
+reg                                                         en_p2_n;
 
 //********************************* Loop Integer **********************************
 genvar i;
 
 // ----------------------------------- Enable Signal Logic ------------------------------------
-assign en_p1_n = (gelu_block_valid_n) ? 1 : 0;
 assign gelu_valid_n = en_p2_n;
+
+always @* begin
+    en_p1_n = (gelu_block_valid_n) ? 1 : 0;
+end
 
 always @(posedge clk_p or negedge rst_n) begin
     if(!rst_n) begin 
