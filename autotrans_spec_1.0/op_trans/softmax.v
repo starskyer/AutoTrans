@@ -9,12 +9,12 @@ module softmax #(
 	input      [DATA_WIDTH * INPUT_NUM-1:0] 	  inputs,
 	input 								  		  input_valid_n,
 	output reg [DATA_WIDTH * OUTPUT_NUM-1:0]      outputs,
-	output reg 									  output_valid_n
+	output  									  output_valid_n
 );
 
 wire enable;
 assign enable = ~input_valid_n;
-wire ackSoft;
+reg ackSoft;
 assign output_valid_n = ~ackSoft;
 
 wire [DATA_WIDTH-1:0] expSum;

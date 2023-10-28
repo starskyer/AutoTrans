@@ -26,7 +26,7 @@ localparam COUNT_MAX = HEAD_NUM / OUTPUT_SHAPE_2; //DSE algorithm modifies OUTPU
 reg [COUNT_MAX - 1 : 0] count;
 reg split_complete;
 
-reg [DATA_WIDTH * INPUT_SHAPE_1 * INPUT_SHAPE_2] matrix_mem;
+reg [DATA_WIDTH * INPUT_SHAPE_1 * INPUT_SHAPE_2 - 1 : 0] matrix_mem;
 
 always @ (posedge clk_p or negedge rst_n) begin
     if(!rst_n) begin
@@ -58,8 +58,8 @@ always @ (posedge clk_p or negedge rst_n) begin
     end
 end
 
-assign split_matrix = matrix_mem [(count + 1) * DATA_WIDTH * OUTPUT_SHAPE_1 * OUTPUT_SHAPE_2 * OUTPUT_SHAPE_3 - 1 :
-                                   count * DATA_WIDTH * OUTPUT_SHAPE_1 * OUTPUT_SHAPE_2 * OUTPUT_SHAPE_3];
+assign split_matrix = matrix_mem [count * DATA_WIDTH * OUTPUT_SHAPE_1 * OUTPUT_SHAPE_2 * OUTPUT_SHAPE_3 +:
+                                  DATA_WIDTH * OUTPUT_SHAPE_1 * OUTPUT_SHAPE_2 * OUTPUT_SHAPE_3];
 assign output_valid_n = split_complete;
 
 endmodule

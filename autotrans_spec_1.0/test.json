@@ -1,50 +1,519 @@
-[   
-    {
-        "op_id": 579,
-        "op_name": "Reshape_624",
-        "op_type": "Split",
-        "input": [
-            "mixed_key_layer.35",
-            "onnx::Reshape_1628"
+[    
+{
+    "op_id": 26,
+    "op_name": "MAC_3",
+    "op_type": "MAC",
+    "input": [
+        "onnx::MatMul_1623",
+        "input.8",
+        "bert.encoder.layer.0.attention.self.value.bias"
+    ],
+    "output": [
+        "mixed_value_layer"
+    ],
+    "input_shape": [
+        [
+            768,
+            768
         ],
-        "output": [
-            "onnx::Transpose_1304"
+        [
+            32,
+            128,
+            768
         ],
-        "input_shape": [
+        [
+            768
+        ]
+    ],
+    "output_shape": [
+        [
+            32,
+            128,
+            768
+        ]
+    ],
+    "topo": {
+        "pre": [
             [
-                32,
-                128,
-                768
+                0,
+                "Init"
             ],
             [
-                4
-            ]
-        ],
-        "output_shape": [
-            [
-                32,
-                128,
-                12,
-                64
-            ]
-        ],
-        "topo": {
-            "pre": [
-                [
-                    573,
-                    "MAC"
-                ],
-                [
-                    0,
-                    "Init"
-                ]
+                10,
+                "Layernorm"
             ],
-            "next": [
-                [
-                    582,
-                    "Transpose"
-                ]
+            [
+                0,
+                "Init"
             ]
-        }
+        ],
+        "next": [
+            [
+                31,
+                "Reshape"
+            ]
+        ]
     }
+},
+{
+    "op_id": 28,
+    "op_name": "Reshape_73",
+    "op_type": "Split",
+    "input": [
+        "mixed_query_layer",
+        "onnx::Reshape_1628"
+    ],
+    "output": [
+        "onnx::Transpose_245"
+    ],
+    "input_shape": [
+        [
+            32,
+            128,
+            768
+        ],
+        [
+            4
+        ]
+    ],
+    "output_shape": [
+        [
+            32,
+            128,
+            12,
+            64
+        ]
+    ],
+    "topo": {
+        "pre": [
+            [
+                22,
+                "MAC"
+            ],
+            [
+                0,
+                "Init"
+            ]
+        ],
+        "next": [
+            [
+                29,
+                "Transpose"
+            ]
+        ]
+    }
+},
+{
+    "op_id": 29,
+    "op_name": "Transpose_74",
+    "op_type": "Transpose",
+    "input": [
+        "onnx::Transpose_245"
+    ],
+    "output": [
+        "onnx::MatMul_246"
+    ],
+    "input_shape": [
+        [
+            32,
+            128,
+            12,
+            64
+        ]
+    ],
+    "output_shape": [
+        [
+            32,
+            12,
+            128,
+            64
+        ]
+    ],
+    "topo": {
+        "pre": [
+            [
+                28,
+                "Reshape"
+            ]
+        ],
+        "next": [
+            [
+                34,
+                "MatMul"
+            ]
+        ]
+    }
+},
+{
+    "op_id": 30,
+    "op_name": "Reshape_75",
+    "op_type": "Split",
+    "input": [
+        "mixed_key_layer",
+        "onnx::Reshape_1628"
+    ],
+    "output": [
+        "onnx::Transpose_260"
+    ],
+    "input_shape": [
+        [
+            32,
+            128,
+            768
+        ],
+        [
+            4
+        ]
+    ],
+    "output_shape": [
+        [
+            32,
+            128,
+            12,
+            64
+        ]
+    ],
+    "topo": {
+        "pre": [
+            [
+                24,
+                "MAC"
+            ],
+            [
+                0,
+                "Init"
+            ]
+        ],
+        "next": [
+            [
+                33,
+                "Transpose"
+            ]
+        ]
+    }
+},
+{
+    "op_id": 31,
+    "op_name": "Reshape_76",
+    "op_type": "Split",
+    "input": [
+        "mixed_value_layer",
+        "onnx::Reshape_1628"
+    ],
+    "output": [
+        "onnx::Transpose_274"
+    ],
+    "input_shape": [
+        [
+            32,
+            128,
+            768
+        ],
+        [
+            4
+        ]
+    ],
+    "output_shape": [
+        [
+            32,
+            128,
+            12,
+            64
+        ]
+    ],
+    "topo": {
+        "pre": [
+            [
+                26,
+                "MAC"
+            ],
+            [
+                0,
+                "Init"
+            ]
+        ],
+        "next": [
+            [
+                32,
+                "Transpose"
+            ]
+        ]
+    }
+},
+{
+    "op_id": 32,
+    "op_name": "Transpose_77",
+    "op_type": "Transpose",
+    "input": [
+        "onnx::Transpose_274"
+    ],
+    "output": [
+        "onnx::MatMul_275"
+    ],
+    "input_shape": [
+        [
+            32,
+            128,
+            12,
+            64
+        ]
+    ],
+    "output_shape": [
+        [
+            32,
+            12,
+            128,
+            64
+        ]
+    ],
+    "topo": {
+        "pre": [
+            [
+                31,
+                "Reshape"
+            ]
+        ],
+        "next": [
+            [
+                40,
+                "MatMul"
+            ]
+        ]
+    }
+},
+{
+    "op_id": 33,
+    "op_name": "Transpose_78",
+    "op_type": "Transpose",
+    "input": [
+        "onnx::Transpose_260"
+    ],
+    "output": [
+        "onnx::MatMul_276"
+    ],
+    "input_shape": [
+        [
+            32,
+            128,
+            12,
+            64
+        ]
+    ],
+    "output_shape": [
+        [
+            32,
+            12,
+            64,
+            128
+        ]
+    ],
+    "topo": {
+        "pre": [
+            [
+                30,
+                "Reshape"
+            ]
+        ],
+        "next": [
+            [
+                34,
+                "MatMul"
+            ]
+        ]
+    }
+},
+{
+    "op_id": 34,
+    "op_name": "MatMul_1",
+    "op_type": "MatMul",
+    "input": [
+        "onnx::MatMul_246",
+        "onnx::MatMul_276"
+    ],
+    "output": [
+        "input.12"
+    ],
+    "input_shape": [
+        [
+            32,
+            12,
+            128,
+            64
+        ],
+        [
+            32,
+            12,
+            64,
+            128
+        ]
+    ],
+    "output_shape": [
+        [
+            32,
+            12,
+            128,
+            128
+        ]
+    ],
+    "topo": {
+        "pre": [
+            [
+                29,
+                "Transpose"
+            ],
+            [
+                33,
+                "Transpose"
+            ]
+        ],
+        "next": [
+            [
+                39,
+                "Softmax"
+            ]
+        ]
+    }
+},
+
+{
+    "op_id": 40,
+    "op_name": "MatMul_85",
+    "op_type": "MatMul",
+    "input": [
+        "input.12",
+        "onnx::MatMul_275"
+    ],
+    "output": [
+        "onnx::Transpose_283"
+    ],
+    "input_shape": [
+        [
+            32,
+            12,
+            128,
+            128
+        ],
+        [
+            32,
+            12,
+            128,
+            64
+        ]
+    ],
+    "output_shape": [
+        [
+            32,
+            12,
+            128,
+            64
+        ]
+    ],
+    "topo": {
+        "pre": [
+            [
+                39,
+                "Softmax"
+            ],
+            [
+                32,
+                "Transpose"
+            ]
+        ],
+        "next": [
+            [
+                41,
+                "Transpose"
+            ]
+        ]
+    }
+},
+{
+    "op_id": 41,
+    "op_name": "Transpose_86",
+    "op_type": "Transpose",
+    "input": [
+        "onnx::Transpose_283"
+    ],
+    "output": [
+        "onnx::Reshape_284"
+    ],
+    "input_shape": [
+        [
+            32,
+            12,
+            128,
+            64
+        ]
+    ],
+    "output_shape": [
+        [
+            32,
+            128,
+            12,
+            64
+        ]
+    ],
+    "topo": {
+        "pre": [
+            [
+                40,
+                "MatMul"
+            ]
+        ],
+        "next": [
+            [
+                42,
+                "Reshape"
+            ]
+        ]
+    }
+},
+{
+    "op_id": 42,
+    "op_name": "Reshape_87",
+    "op_type": "Merge",
+    "input": [
+        "onnx::Reshape_284",
+        "onnx::Reshape_1642"
+    ],
+    "output": [
+        "onnx::MatMul_295"
+    ],
+    "input_shape": [
+        [
+            32,
+            128,
+            12,
+            64
+        ],
+        [
+            3
+        ]
+    ],
+    "output_shape": [
+        [
+            32,
+            128,
+            768
+        ]
+    ],
+    "topo": {
+        "pre": [
+            [
+                41,
+                "Transpose"
+            ],
+            [
+                0,
+                "Init"
+            ]
+        ],
+        "next": [
+            [
+                43,
+                "MAC"
+            ]
+        ]
+    }
+}
 ]

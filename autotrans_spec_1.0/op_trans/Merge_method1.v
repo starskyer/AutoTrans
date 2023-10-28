@@ -26,7 +26,7 @@ localparam COUNT_MAX = HEAD_NUM / INPUT_SHAPE_2; //DSE algorithm modifies INPUT_
 reg [COUNT_MAX - 1 : 0] count;
 reg merge_complete;
 
-reg [DATA_WIDTH * OUTPUT_SHAPE_1 * OUTPUT_SHAPE_2] matrix_mem;
+reg [DATA_WIDTH * OUTPUT_SHAPE_1 * OUTPUT_SHAPE_2 - 1 : 0] matrix_mem;
 
 always @ (posedge clk_p or negedge rst_n) begin
     if(!rst_n) begin
@@ -38,8 +38,8 @@ always @ (posedge clk_p or negedge rst_n) begin
             count <= 'd0;
             if(!input_valid_n) begin
                 merge_complete <= 'd0;
-                matrix_mem[(count + 1) * DATA_WIDTH * INPUT_SHAPE_1 * INPUT_SHAPE_2 * INPUT_SHAPE_3 - 1 :
-                        count * DATA_WIDTH * INPUT_SHAPE_1 * INPUT_SHAPE_2 * INPUT_SHAPE_3] <= matrix;
+                matrix_mem[count * DATA_WIDTH * INPUT_SHAPE_1 * INPUT_SHAPE_2 * INPUT_SHAPE_3 +:
+                           DATA_WIDTH * INPUT_SHAPE_1 * INPUT_SHAPE_2 * INPUT_SHAPE_3] <= matrix;
             end
             else begin
                 merge_complete <= 'd1;
@@ -54,8 +54,8 @@ always @ (posedge clk_p or negedge rst_n) begin
             end
             else begin                
                 count <= count + 'd1;  
-                matrix_mem[(count + 1) * DATA_WIDTH * INPUT_SHAPE_1 * INPUT_SHAPE_2 * INPUT_SHAPE_3 - 1 :
-                        count * DATA_WIDTH * INPUT_SHAPE_1 * INPUT_SHAPE_2 * INPUT_SHAPE_3] <= matrix;
+                matrix_mem[count * DATA_WIDTH * INPUT_SHAPE_1 * INPUT_SHAPE_2 * INPUT_SHAPE_3 +:
+                           DATA_WIDTH * INPUT_SHAPE_1 * INPUT_SHAPE_2 * INPUT_SHAPE_3] <= matrix;
             end
         end
     end
