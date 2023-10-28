@@ -35,7 +35,7 @@ module Softmax_method1
             softmax_matrix #(.DATA_WIDTH(DATA_WIDTH), .INPUT_SHAPE1(INPUT_SHAPE_1), .INPUT_SHAPE2(INPUT_SHAPE_2),
                              .OUTPUT_SHAPE1(OUTPUT_SHAPE_1), .OUTPUT_SHAPE2(OUTPUT_SHAPE_2))
             u_softmax_matrix (.clk_p(clk_p), .rst_n(rst_n), .matrix(matrix_mem[i]), .input_valid_n(input_valid_n),
-                              .softmax_matrix(softmax_matrix_mem[i], .output_valid_n(output_block_valid_n[i])));
+                              .softmax_matrix(softmax_matrix_mem[i]), .output_valid_n(output_block_valid_n[i]));
         end
     endgenerate
 
