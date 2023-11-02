@@ -9,11 +9,12 @@ from corresponding_operators import corresponding_operators_function
 import re
 # model=onnx.load("./test.onnx")
 class constructor(object):
-    output_dict=[]#全部都是wire类型
+    output_dict=[]
     input_dict=[]#全部都是input,是列表
     input_diff=[]#删除重复元素的input list
-
-
+    wire_dict=[]
+    only_output_dict=[]
+    
     WIDTH_IN=[]
     WIDTH_OUT=[]#存放了所有的in位宽,与输入信号对应
     RESULT_STRING=[]#存放了所有的out位宽,与输出信号对应
@@ -25,7 +26,7 @@ class constructor(object):
     def __init__(self) -> None:
         pass
     def simpleDiff(self,input_dict,unique_list):
-        '''简单去重'''
+        '''简单对input去重,因为可能有同个输入输入给多个模块'''
         record=[]
         unique_list_firstStep=[]
 
@@ -44,8 +45,20 @@ class constructor(object):
             if index not in record:
                 unique_list.append(x)
     
-    def diff_To_Find_Input_Signal(self,input_diff,output_dict,unique_list):
-        '''筛查去掉input和output重复的信号'''
+    def diff_To_Find_Input_Output_Wire_Signal(self,input_diff,wire_dict,only_output_dict,output_dict,unique_list):
+        '''筛查去掉input和output重复的信号,并作为wire,unique list为简单去重后的input列表'''
+        
+        for item_out in output_dict:
+            flag=0
+            for item_in in unique_list:
+                if(item_in.split("]")   [-1]     ==    item_out.split("]")  [-1] ):
+                    flag=1
+            if flag ==1:
+                wire_dict.append('wire'+"\t"+item_out)
+            else:
+                only_output_dict.append('output'+"\t"+item_out)
+
+
         for index,element_in in enumerate(unique_list):
             flag=0#flag等于0表示没有和他一样的
             for element_out in output_dict:
@@ -54,18 +67,15 @@ class constructor(object):
             if(flag==0):
                 input_diff.append(unique_list[index])
 
-    def generateInputAndOutputAndWire(self,data,output_dict,input_dict,WIDTH_IN,WIDTH_OUT):
+    def generateInputAndOutputAndWire(self,data,output_dict,input_dict,WIDTH_IN,WIDTH_OUT):#wire_dict,only_output_dict直接作为成员变量操作,不加到参数列表里
         '''将所有输入输出信号加上wire/input/output和对应的位宽,修改建议是把id是最后的使能信号的输出读出来作为output,其余作为wire'''
         for data_information_dict in data:#顺序遍历输出字典
             for i in range(len(data_information_dict["output"])):
                 output_dict.append(data_information_dict["output"][i])
-        for index_1,item_out in enumerate(output_dict[len(output_dict)-len(data[len(data)-1]["output"])\
-                                                    :len(output_dict)],\
-                                                        start=len(output_dict)-len(data[len(data)-1]["output"])):
-                output_dict[index_1]="output"+"\t"+"{}".format(WIDTH_OUT[index_1])+item_out.translate(str.maketrans({'.': '_'})).replace("onnx::","onnx_")
+        for index_1,item_out in enumerate(output_dict):
+                output_dict[index_1]="{}".format(WIDTH_OUT[index_1])+item_out.translate(str.maketrans({'.': '_'})).replace("onnx::","onnx_")
 
-        for index,item_out in enumerate(output_dict[0:len(output_dict)-len(data_information_dict["output"])]):
-                output_dict[index]="wire"+"\t"+"{}".format(WIDTH_OUT[index])+item_out.translate(str.maketrans({'.': '_'})).replace("onnx::","onnx_")
+        
 
 
         for data_information_dict in data:#顺序遍历输入字典
@@ -78,21 +88,19 @@ class constructor(object):
 
         self.simpleDiff(self.input_dict,self.unique_list)#简单去除相同元素
         
-        self.diff_To_Find_Input_Signal(self.input_diff,self.output_dict,self.unique_list)
+        self.diff_To_Find_Input_Output_Wire_Signal(self.input_diff,self.wire_dict,self.only_output_dict,self.output_dict,self.unique_list)
 
-    def state_valid_signal_is_wire(self,file,key_VALID_IN_min,key_VALID_OUT_max,key_VALID_IN_list,key_VALID_OUT_list):
+    def state_valid_signal_is_wire(self,file,key_VALID_IN_wire,key_VALID_OUT_wire):
             '''写入所有是线网的使能信号'''
-            key_VALID_IN_list_nomin=[x for x in key_VALID_IN_list if x !=key_VALID_IN_min ]#把input使能对应的op_id去掉
-            key_VALID_OUT_list_nomax=[x for x in key_VALID_OUT_list if x !=key_VALID_OUT_max ]#把output使能对应的op_id去掉
-            for i in key_VALID_IN_list_nomin:
+            for i in key_VALID_IN_wire:
                 for valid_signal in self.VALID_IN[i]:#输出其他输入使能信号,全部为wire信号
                         file.write('wire'+'\t'+valid_signal+";"+'\n')
-            for i in key_VALID_OUT_list_nomax:            
+            for i in key_VALID_OUT_wire:            
                 for valid_signal in self.VALID_OUT[i]:#输出其他output使能信号,全部为wire信号
                         file.write('wire'+'\t'+valid_signal+";"+'\n')
         
-    def create_middle_signal_connection(self,file,data,VALID_IN,VALID_OUT,key_VALID_IN_list,key_VALID_OUT_list):
-        '''使能信号连线'''
+    def create_middle_signal_connection(self,file,data,VALID_IN,VALID_OUT,key_VALID_IN_list,key_VALID_OUT_list,Opid_Valid_Input_List):
+        '''使能信号连线,还有问题'''
         for data_information_dict in data:
                 for topo_next_number in range(len(data_information_dict['topo']['next'])):
                     print(data_information_dict['topo']['next'][topo_next_number][0])
@@ -108,56 +116,110 @@ class constructor(object):
                                     else:             
                                         file.write(thisModuleOutputV+" & ")
                                       
-                if data_information_dict['topo']['pre'][0][0] not in key_VALID_OUT_list: #对应json中前几个算子的pre是没有的情况
-                    for index,thisModuleInputV in enumerate(VALID_IN[data_information_dict['op_id']]):
-                            file.write("assign "+thisModuleInputV+" = 'b1 ;"+'\n') 
+                if data_information_dict['topo']['pre'][0][0] not in key_VALID_OUT_list: #对应json中前几个算子的pre是没有,那要分是否是输入模块情况讨论,理论上都是输入模块无需写,实际还需要调整
+                    if data_information_dict['op_id'] not in Opid_Valid_Input_List:
+                        for index,thisModuleInputV in enumerate(VALID_IN[data_information_dict['op_id']]):
+                                file.write("assign "+thisModuleInputV+" = 'b1 ;"+'\n') 
                       
+    def getOpid_Valid_IO_List(self,Opid_Valid_Input_List,Opid_Valid_Output_List,input_diff,only_output_dict,data):
+        '''拿到所有数据输入都是输入的模块(它的valid_in是input)的op_id/拿到所有数据输出都是输出的模块(它的valid_out是output)的op_id,
+            通过Opid_Valid_Input_List,Opid_Valid_Output_List传出'''
+        input_name=[]
+        output_name=[]
+        for input_diff_item in input_diff:#拿到所有输入输出的名字,存在input_name和output_name里
+            input_name.append(input_diff_item.split("]")  [-1] )
+        for output_diff_item in only_output_dict:
+            output_name.append(output_diff_item.split("]")  [-1] )
 
-    def open_and_write(self,top_module_address,input_diff,RESULT_STRING,VALID_IN,VALID_OUT,output_dict,data):
+
+        for data_information_dict in data:
+            flag=1
+            for i in range(len(data_information_dict["input"])):
+                if data_information_dict["input"][i].translate(str.maketrans({'.': '_'})).replace("onnx::","onnx_") not in input_name :
+                    flag=0#flag=0表示该算子有输入不在input_diff,只有算子的输入全部在input_diff里该算子的valid才是input
+            if flag==1:
+                Opid_Valid_Input_List.append(data_information_dict['op_id'])
+
+
+        for data_information_dict in data:
+            flag=1
+            for i in range(len(data_information_dict["output"])):
+                if data_information_dict["output"][i].translate(str.maketrans({'.': '_'})).replace("onnx::","onnx_") not in output_name:
+                    flag=0#flag=0表示该算子有输入不在only_output_dict,只有算子的输入全部在only_output_dict里该算子的valid才是output
+            if flag==1:
+                Opid_Valid_Output_List.append(data_information_dict['op_id'])   
+
+    def open_and_write(self,top_module_address,input_diff,wire_dict,only_output_dict,RESULT_STRING,VALID_IN,VALID_OUT,data):
         '''打开文件写入输入(使能)信号,输出(使能)信号和wire信号'''
         with open(top_module_address,'a+') as file:
+            print(only_output_dict)
+            print(wire_dict)
             file.write('module top_module(\n')
             file.write('input clk_p,\n')
             file.write('input rst_n,\n')
             #input,output,wire变量定义
+            Opid_Valid_Input_List=[]
+            Opid_Valid_Output_List=[]
+            
+
             key_VALID_IN_list=VALID_IN.keys()
             key_VALID_OUT_list=VALID_OUT.keys()
-            key_VALID_IN_min=min(key_VALID_IN_list)
-            key_VALID_OUT_max=max(key_VALID_OUT_list)
-            for first_module_valid in VALID_IN[key_VALID_IN_min]:#最开始的使能信号为input
-                file.write('input'+'\t'+first_module_valid+","+'\n')
-            for str_in in input_diff: 
+          
+     
+            self.getOpid_Valid_IO_List(Opid_Valid_Input_List,Opid_Valid_Output_List,input_diff,only_output_dict,data)
+          
+
+
+
+            for opid in Opid_Valid_Input_List:
+                for valid_signal_as_input in VALID_IN[opid]:#写入input_valid信号
+                    file.write('input'+'\t'+valid_signal_as_input+","+'\n')
+
+
+            for str_in in input_diff: #写入所有数据输入信号
                 file.write(str_in+','+"\n")
 
 
-            for module_output_valid in VALID_OUT[key_VALID_OUT_max]:   #最后一个算子的output使能为top模块的output信号
-                file.write("output"+'\t'+module_output_valid+','+'\n')
+            for opid in Opid_Valid_Output_List:
+                for valid_signal_as_output in VALID_OUT[opid]:#写入output_valid信号
+                    file.write('output'+'\t'+valid_signal_as_output+","+'\n')
 
 
-            for str_output in output_dict[len(output_dict)-len(data[len(data)-1]["output"])\
-                                                    :len(output_dict)]:#最后一个算子的output数据信号为output,其他为为wire
-                if(str_output==output_dict[len(output_dict)-1]):
+            for str_output in only_output_dict:#写入所有数据输出信号
+                if(str_output==only_output_dict[len(only_output_dict)-1]):
                     file.write(str_output+'\n'+');'+'\n')
                 else:
                     file.write(str_output+','+'\n')
-            print()
-            print(VALID_IN)
-            print(VALID_OUT)
-            for str_out in output_dict[0:len(output_dict)-len(data[len(data)-1]["output"])]:
+
+
+            for str_out in wire_dict:
                 file.write(str_out+";"+"\n")
-            self.state_valid_signal_is_wire(file,key_VALID_IN_min,key_VALID_OUT_max,key_VALID_IN_list,key_VALID_OUT_list)
+
+            #分输入/输出获得所有其他的opid(输入id刨掉Opid_Valid_Input_List,输出id刨掉Opid_Valid_Output_List),他们的输入/输出valid均为wire
+            key_VALID_IN_wire=[]
+            key_VALID_OUT_wire=[]
+            for id in key_VALID_IN_list:
+                if id not in Opid_Valid_Input_List:
+                    key_VALID_IN_wire.append(id)
+            for id in key_VALID_OUT_list:
+                if id not in Opid_Valid_Output_List:
+                    key_VALID_OUT_wire.append(id)
+
+            self.state_valid_signal_is_wire(file,key_VALID_IN_wire,key_VALID_OUT_wire)
 
 
             file.write("\n")#接下来生成具体电路了
 
             #使能连线
-            self.create_middle_signal_connection(file,data,self.VALID_IN,self.VALID_OUT,key_VALID_IN_list,key_VALID_OUT_list)
+            self.create_middle_signal_connection(file,data,self.VALID_IN,self.VALID_OUT,key_VALID_IN_list,key_VALID_OUT_list,Opid_Valid_Input_List)
             #模块调用
             for content in RESULT_STRING:
                 file.write(content)     
             file.write("\n")
             file.write('endmodule')
                       
+
+
     def generateTopModule(self):
         ''' 生成顶层模块 '''
         with open('autotrans_spec_1.0/test.json') as f:
@@ -173,9 +235,9 @@ class constructor(object):
         # #automation    
 
         self.open_and_write(self.top_module_address,
-                            self.input_diff,self.RESULT_STRING,
+                            self.input_diff,self.wire_dict,self.only_output_dict,self.RESULT_STRING,
                             self.VALID_IN,self.VALID_OUT,
-                            self.output_dict,data)
+                            data)
        
 test=constructor()
 test.generateTopModule()

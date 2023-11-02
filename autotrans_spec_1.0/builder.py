@@ -189,7 +189,7 @@ class builder(object):
 
 
 def main():
-    test = builder(mode = "code", network_file = "./autotrans_spec_1.0/test_info.json",
+    test = builder(mode = "code", network_file = "./autotrans_spec_1.0/test.json",
                    libinfo_file = "autotrans_spec_1.0/libinfo.ini", head_num = 4, data_width = 8)
     test.build()  
 
